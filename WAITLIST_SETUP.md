@@ -41,12 +41,14 @@ function doPost(e) {
   return createPostMessagePage(true);
 }
 
-// Tell the parent/top window (landing page) the result so it can show success without redirect.
+// Tell the parent (postMessage) and redirect iframe so parent can detect success via same-origin load.
 function createPostMessagePage(success) {
   var json = success ? '{"type":"waitlist","success":true}' : '{"type":"waitlist","success":false}';
+  var q = success ? 'joined=1' : 'error=1';
   return HtmlService.createHtmlOutput(
     '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><p>Thanks. You\'re on the list.</p>' +
-    '<script>try { (window.top || window.parent).postMessage(' + json + ', "*"); } catch (e) {}</script></body></html>'
+    '<script>try { (window.top || window.parent).postMessage(' + json + ', "*"); } catch (e) {}' +
+    'setTimeout(function(){ window.location.href = "https://getrestock.app?' + q + '"; }, 150);</script></body></html>'
   ).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 ```
