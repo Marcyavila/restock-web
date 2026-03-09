@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReStock Pro | Instant Restock Alerts</title>
+  <meta name="description" content="Track products and get instant alerts when they restock. Stop checking pages manually.">
+  <link rel="icon" type="image/png" href="icon16.png" sizes="16x16">
+  <link rel="icon" type="image/png" href="icon48.png" sizes="48x48">
+  <link rel="apple-touch-icon" href="icon128.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07080c;
+      --surface: #0d0f14;
+      --surface-elevated: #12151c;
+      --surface-card: rgba(18, 21, 28, 0.72);
+      --border: rgba(255,255,255,0.05);
+      --border-strong: rgba(255,255,255,0.08);
+      --text: #f8f9fc;
+      --text-secondary: rgba(248, 249, 252, 0.72);
+      --text-tertiary: rgba(248, 249, 252, 0.42);
+      --accent: #8b5cf6;
+      --accent-hover: #9d6ffa;
+      --accent-glow: rgba(139, 92, 246, 0.28);
+      --accent-muted: rgba(139,92,246,0.12);
+      --success: #22c55e;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --radius-lg: 24px;
+      --shadow-card: 0 24px 48px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255,255,255,0.04);
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html { height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text);
+      background: radial-gradient(ellipse 100% 70% at 50% -20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(99, 102, 241, 0.04) 0%, transparent 50%),
+        linear-gradient(180deg, #07080c 0%, #0a0c12 40%, #07080c 100%);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Peek-style starfield */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .stars .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px 0 rgba(139, 92, 246, 0.18);
+      animation: star-peek 4s ease-in-out infinite;
+    }
+    .stars .star:nth-child(odd) { animation-delay: -1s; }
+    .stars .star:nth-child(3n) { animation-delay: -2s; }
+    .stars .star.star--small {
+      width: 1px;
+      height: 1px;
+      box-shadow: 0 0 4px 0 rgba(139, 92, 246, 0.14);
+    }
+    @keyframes star-peek {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+      background: var(--surface-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 2.5rem 2rem;
+    }
+
+    .logo {
+      display: block;
+      height: 52px;
+      width: auto;
+      max-width: 220px;
+      margin: 0 auto 1.75rem;
+      object-fit: contain;
+      -webkit-user-drag: none;
+      user-drag: none;
+      user-select: none;
+      -webkit-user-select: none;
+      pointer-events: auto;
+    }
+
+    .tagline {
+      font-size: 1.0625rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      letter-spacing: 0.01em;
+      margin: 0 0 2rem;
+      max-width: 28ch;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .waitlist-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .email-input-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .email-input-wrap.shake {
+      animation: shake-kb 0.3s ease-in-out both;
+    }
+    .waitlist-form .email-input-wrap.shake input[type="email"] {
+      border-color: rgba(239, 68, 68, 0.6) !important;
+      box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25), inset 0 1px 0 rgba(255,255,255,0.02);
+    }
+    .email-error-overlay {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      padding: 0 20px;
+      line-height: 52px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #f87171;
+      background: rgba(15, 18, 25, 0.6);
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      pointer-events: auto;
+      cursor: text;
+      border-radius: var(--radius-sm);
+    }
+    .email-error-overlay.visible {
+      display: block;
+    }
+    .waitlist-form input[type="email"] {
+      width: 100%;
+      height: 52px;
+      padding: 0 20px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+      transition: border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), background 0.2s ease;
+    }
+    .waitlist-form input[type="email"]::placeholder {
+      color: var(--text-tertiary);
+    }
+    .waitlist-form input[type="email"].error-placeholder::placeholder {
+      color: #f87171;
+    }
+    .waitlist-form input[type="email"].error-value {
+      color: #f87171;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .waitlist-form input[type="email"]:focus {
+      outline: none;
+      border-color: rgba(139, 92, 246, 0.5);
+      box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.35), inset 0 1px 0 rgba(255,255,255,0.02);
+    }
+    @keyframes shake-kb {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(2px); }
+    }
+
+    .waitlist-form button {
+      width: 100%;
+      height: 52px;
+      padding: 0 24px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #fff;
+      background: linear-gradient(180deg, #9370f7 0%, #7c3aed 100%);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.1) inset, 0 4px 20px var(--accent-glow);
+      transition: box-shadow 0.3s var(--ease-out), transform 0.2s var(--ease-out);
+    }
+    .waitlist-form button:hover {
+      box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset, 0 8px 28px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+    .waitlist-form button:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 2px 12px var(--accent-glow);
+    }
+    .waitlist-form button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .form-note {
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+      letter-spacing: 0.01em;
+      margin: 0;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    .success-message {
+      display: none;
+      padding: 20px 24px;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: #86efac;
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.22);
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
+    }
+    .success-message.visible {
+      display: block;
+    }
+
+    .error-message {
+      display: none;
+      padding: 16px 20px;
+      font-size: 0.9375rem;
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.22);
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
+    }
+    .error-message.visible {
+      display: block;
+    }
+
+    .footer {
+      margin-top: 2.5rem;
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      letter-spacing: 0.02em;
+    }
+    .footer a {
+      color: var(--accent-hover);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .footer a:hover {
+      color: #b39cff;
+      text-decoration: underline;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stars .star,
+      .stars .star.star--small {
+        animation: none;
+        opacity: 0.5;
+      }
+      .email-input-wrap.shake {
+        animation: none;
+      }
+    }
+
+    /* Mobile & small screens */
+    @media (max-width: 480px) {
+      body {
+        padding: 1.25rem 1rem;
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+        padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+      }
+      .page {
+        max-width: 100%;
+        padding: 1.75rem 1.25rem;
+      }
+      .logo {
+        height: 44px;
+        max-width: 180px;
+        margin-bottom: 1.25rem;
+      }
+      .tagline {
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        padding: 0 0.25rem;
+      }
+      .waitlist-form {
+        gap: 10px;
+        margin-bottom: 0.75rem;
+      }
+      .waitlist-form input[type="email"],
+      .waitlist-form button {
+        height: 48px;
+        font-size: 16px; /* prevents iOS zoom on focus */
+      }
+      .waitlist-form input[type="email"] {
+        padding: 0 16px;
+      }
+      .email-error-overlay {
+        padding: 0 16px;
+        line-height: 48px;
+      }
+      .waitlist-form button {
+        padding: 0 20px;
+      }
+      .form-note {
+        font-size: 0.75rem;
+      }
+      .success-message,
+      .error-message {
+        padding: 16px 18px;
+        font-size: 0.9375rem;
+      }
+      .footer {
+        margin-top: 1.75rem;
+        font-size: 0.6875rem;
+        padding: 0 0.25rem;
+      }
+    }
+
+    /* Very small phones */
+    @media (max-width: 360px) {
+      body {
+        padding: 1rem 0.75rem;
+      }
+      .page {
+        padding: 1.5rem 1rem;
+      }
+      .logo {
+        height: 40px;
+        max-width: 160px;
+        margin-bottom: 1rem;
+      }
+      .tagline {
+        font-size: 0.9375rem;
+        margin-bottom: 1.25rem;
+      }
+      .waitlist-form input[type="email"],
+      .waitlist-form button {
+        height: 44px;
+      }
+      .email-error-overlay {
+        line-height: 44px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" aria-hidden="true">
+    <span class="star" style="left: 5%; top: 12%;"></span>
+    <span class="star star--small" style="left: 12%; top: 28%;"></span>
+    <span class="star" style="left: 88%; top: 18%;"></span>
+    <span class="star star--small" style="left: 92%; top: 35%;"></span>
+    <span class="star" style="left: 22%; top: 55%;"></span>
+    <span class="star star--small" style="left: 75%; top: 62%;"></span>
+    <span class="star" style="left: 8%; top: 78%;"></span>
+    <span class="star star--small" style="left: 45%; top: 22%;"></span>
+    <span class="star" style="left: 55%; top: 72%;"></span>
+    <span class="star star--small" style="left: 35%; top: 88%;"></span>
+  </div>
+
+  <main class="page">
+    <img src="logo.png" alt="ReStock Pro" class="logo" width="220" height="52" draggable="false">
+    <p class="tagline">Never miss a restock again.</p>
+
+    <div id="successMessage" class="success-message" role="status">
+      You’re in. We’ll email you when ReStock Pro launches.
+    </div>
+
+    <div id="errorMessage" class="error-message" role="alert"></div>
+
+    <!-- action used when JS is off (progressive enhancement); keep in sync with WAITLIST_ENDPOINT in script -->
+    <form id="waitlistForm" class="waitlist-form" action="https://script.google.com/macros/s/AKfycbyXiERWSL2YHE8w5Pz91gmVzD3y1QXESkFlh9GHHxLHQxYoUXV2aM7bODTxsN-UlTtI/exec" method="post" novalidate>
+      <div class="email-input-wrap" id="emailInputWrap">
+        <input type="email" name="email" id="email" placeholder="your@email.com" required autocomplete="email" aria-label="Email address">
+        <div class="email-error-overlay" id="emailErrorOverlay" aria-hidden="true"></div>
+      </div>
+      <div class="hidden-fields" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;clip:rect(0,0,0,0);">
+        <input type="hidden" name="ip" value="">
+        <input type="hidden" name="location" value="">
+        <input type="hidden" name="referrer" value="">
+      </div>
+      <button type="submit" id="submitBtn">Get Early Access</button>
+    </form>
+    <p class="form-note">No spam. Just one email when we launch.</p>
+
+    <footer class="footer">
+      Coming soon to the <a href="https://chromewebstore.google.com" target="_blank" rel="noopener">Chrome Web Store</a> · getrestock.app
+    </footer>
+  </main>
+  <iframe name="waitlistFrame" id="waitlistFrame" style="position:absolute;width:0;height:0;border:0;visibility:hidden" title="Waitlist submission"></iframe>
+
+  <script>
+    (function() {
+      if (window.self === window.top) return;
+      var q = window.location.search || '';
+      if (q.indexOf('joined=1') !== -1) window.parent.postMessage({ type: 'waitlist', success: true }, '*');
+      else if (q.indexOf('error=1') !== -1) window.parent.postMessage({ type: 'waitlist', success: false }, '*');
+    })();
+  </script>
+  <script>
+    (function() {
+      // Google Apps Script web app URL — waitlist emails are saved to your sheet.
+      var WAITLIST_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyXiERWSL2YHE8w5Pz91gmVzD3y1QXESkFlh9GHHxLHQxYoUXV2aM7bODTxsN-UlTtI/exec';
+
+      var form = document.getElementById('waitlistForm');
+      var emailInput = document.getElementById('email');
+      var emailInputWrap = document.getElementById('emailInputWrap');
+      var emailErrorOverlay = document.getElementById('emailErrorOverlay');
+      var submitBtn = document.getElementById('submitBtn');
+      var successEl = document.getElementById('successMessage');
+      var errorEl = document.getElementById('errorMessage');
+      var defaultPlaceholder = 'your@email.com';
+      var errorPlaceholder = 'Please enter a valid email address.';
+      var placeholderTimeout = null;
+
+      function showSuccess() {
+        errorEl.classList.remove('visible');
+        successEl.classList.add('visible');
+        form.style.display = 'none';
+        document.querySelector('.form-note').style.display = 'none';
+      }
+
+      function showError(msg) {
+        errorEl.textContent = msg || 'Something went wrong. Please try again.';
+        errorEl.classList.add('visible');
+      }
+
+      function clearErrorInbox() {
+        emailErrorOverlay.textContent = '';
+        emailErrorOverlay.classList.remove('visible');
+        if (emailInputWrap) emailInputWrap.classList.remove('shake');
+        emailInput.value = '';
+        emailInput.placeholder = defaultPlaceholder;
+        emailInput.readOnly = false;
+        if (placeholderTimeout) { clearTimeout(placeholderTimeout); placeholderTimeout = null; }
+        emailErrorOverlay.removeEventListener('click', clearErrorInbox);
+        emailInput.focus();
+      }
+
+      function isValidEmail(str) {
+        var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return typeof str === 'string' && str.length > 0 && re.test(str);
+      }
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var email = (emailInput.value || '').trim();
+        if (!email) {
+          emailInput.focus();
+          return;
+        }
+        if (!isValidEmail(email)) {
+          emailInputWrap.classList.add('shake');
+          emailErrorOverlay.textContent = errorPlaceholder;
+          emailErrorOverlay.classList.add('visible');
+          emailInput.value = '';
+          emailInput.placeholder = '';
+          emailInput.readOnly = true;
+          if (placeholderTimeout) clearTimeout(placeholderTimeout);
+          placeholderTimeout = setTimeout(clearErrorInbox, 2500);
+          emailErrorOverlay.addEventListener('click', clearErrorInbox);
+          emailInput.focus();
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Joining…';
+        errorEl.classList.remove('visible');
+
+        if (!WAITLIST_ENDPOINT) {
+          showSuccess();
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Get Early Access';
+          return;
+        }
+
+        var referrer = (typeof document !== 'undefined' && document.referrer) ? document.referrer.trim() : '';
+        if (!referrer) referrer = '(direct)';
+
+        var submitTimeout = null;
+        var submitLoadHandler = null;
+        var submitMessageHandler = null;
+        var EXPECTED_ORIGIN = window.location.origin || (window.location.protocol + '//' + window.location.host);
+        function isAllowedMessageOrigin(origin) {
+          if (!origin || typeof origin !== 'string') return false;
+          if (origin === EXPECTED_ORIGIN) return true;
+          if (origin === 'https://getrestock.app' || origin.indexOf('https://getrestock.app:') === 0) return true;
+          if (origin.indexOf('http://localhost') === 0 || origin.indexOf('http://127.0.0.1') === 0) return true;
+          if (origin === 'https://script.google.com' || origin.indexOf('https://script.google.com') === 0) return true;
+          if (origin.indexOf('https://script.googleusercontent.com') === 0) return true;
+          return false;
+        }
+        var SUCCESS_TIMEOUT_MS = 15000;
+
+        function clearSubmitState() {
+          if (submitTimeout) { clearTimeout(submitTimeout); submitTimeout = null; }
+          if (submitLoadHandler && document.getElementById('waitlistFrame')) {
+            document.getElementById('waitlistFrame').removeEventListener('load', submitLoadHandler);
+            submitLoadHandler = null;
+          }
+          if (submitMessageHandler && window.removeEventListener) {
+            window.removeEventListener('message', submitMessageHandler);
+            submitMessageHandler = null;
+          }
+        }
+
+        function onMessage(event) {
+          if (!event.data || event.data.type !== 'waitlist') return;
+          if (!isAllowedMessageOrigin(event.origin)) return;
+          clearSubmitState();
+          if (event.data.success) {
+            showSuccess();
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Get Early Access';
+          } else {
+            showError('Something went wrong. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Get Early Access';
+          }
+        }
+
+        function onIframeLoad() {
+          var frame = document.getElementById('waitlistFrame');
+          try {
+            var href = frame && frame.contentWindow ? frame.contentWindow.location.href : '';
+            if (href.indexOf(EXPECTED_ORIGIN) !== 0) return;
+            if (href.indexOf('joined=1') !== -1) {
+              clearSubmitState();
+              showSuccess();
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Get Early Access';
+              return;
+            }
+            if (href.indexOf('error=1') !== -1) {
+              clearSubmitState();
+              showError('Something went wrong. Please try again.');
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Get Early Access';
+            }
+          } catch (e) {
+            /* cross-origin: iframe still on Apps Script; wait for redirect or timeout */
+          }
+        }
+
+        function sendToSheet(ip, location) {
+          var postForm = document.createElement('form');
+          postForm.method = 'POST';
+          postForm.action = WAITLIST_ENDPOINT;
+          postForm.target = 'waitlistFrame';
+          postForm.style.display = 'none';
+
+          function addInput(name, value) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            postForm.appendChild(input);
+          }
+          addInput('email', email);
+          addInput('ip', ip || '');
+          addInput('location', location || '');
+          addInput('referrer', referrer || '');
+
+          clearSubmitState();
+          submitLoadHandler = onIframeLoad;
+          submitMessageHandler = onMessage;
+          document.getElementById('waitlistFrame').addEventListener('load', submitLoadHandler);
+          window.addEventListener('message', submitMessageHandler);
+
+          submitTimeout = setTimeout(function() {
+            if (!submitLoadHandler) return;
+            clearSubmitState();
+            showError('Request timed out. Please check your connection and try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Get Early Access';
+          }, SUCCESS_TIMEOUT_MS);
+
+          document.body.appendChild(postForm);
+          postForm.submit();
+          document.body.removeChild(postForm);
+        }
+
+        function tryFallbackIpApi() {
+          fetch('https://ipinfo.io/json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              var ip = (data && data.ip) ? String(data.ip).trim() : '';
+              var parts = [];
+              if (data && data.city) parts.push(data.city);
+              if (data && data.region) parts.push(data.region);
+              if (data && data.country) parts.push(data.country);
+              var location = parts.length ? parts.join(', ') : '';
+              sendToSheet(ip, location);
+            })
+            .catch(function() {
+              sendToSheet('', '');
+            });
+        }
+
+        fetch('https://ipapi.co/json/')
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var ip = (data && data.ip) ? data.ip : '';
+            var parts = [];
+            if (data && data.city) parts.push(data.city);
+            if (data && data.region) parts.push(data.region);
+            if (data && data.country_name) parts.push(data.country_name);
+            var location = parts.length ? parts.join(', ') : '';
+            if (ip || location) {
+              sendToSheet(ip, location);
+            } else {
+              tryFallbackIpApi();
+            }
+          })
+          .catch(function() {
+            tryFallbackIpApi();
+          });
+      });
+    })();
+  </script>
+</body>
+</html>
