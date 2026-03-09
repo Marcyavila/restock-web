@@ -56,7 +56,7 @@
       position: relative;
       overflow-x: hidden;
     }
-    /* Subtle procedural noise overlay: feTurbulence SVG via data URI. baseFrequency 1.65 = small crisp grain, numOctaves 4 = depth. Opacity 0.03 keeps it non-distracting. Fixed, full-screen, pointer-events none, 256px tile for seamless repeat. */
+    /* Subtle procedural noise overlay: feTurbulence SVG via data URI. baseFrequency 2.4 = fine crisp grain, numOctaves 4 = depth. Opacity 0.03 keeps it non-distracting. Fixed, full-screen, pointer-events none, 256px tile for seamless repeat. */
     body::after {
       content: "";
       position: fixed;
@@ -64,7 +64,7 @@
       z-index: 2;
       pointer-events: none;
       opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.65' numOctaves='4' result='t'/%3E%3CfeColorMatrix in='t' type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.4' numOctaves='4' result='t'/%3E%3CfeColorMatrix in='t' type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
       background-size: 256px 256px;
       background-repeat: repeat;
     }
