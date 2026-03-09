@@ -126,6 +126,25 @@
     }
     .page > * { position: relative; }
 
+    .page-spotlight {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      width: 820px;
+      height: 820px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle,
+          rgba(139, 92, 246, 0.16) 0%,
+          rgba(139, 92, 246, 0.08) 22%,
+          rgba(255, 255, 255, 0.04) 38%,
+          rgba(139, 92, 246, 0.03) 52%,
+          transparent 72%);
+      filter: blur(40px);
+    }
+
     .logo {
       display: block;
       height: 60px;
@@ -146,12 +165,12 @@
       color: var(--text);
       line-height: 1.06;
       letter-spacing: -0.035em;
-      margin: 0 auto 0.75rem;
+      margin: 0 auto 0.55rem;
       margin-left: auto;
       margin-right: auto;
       text-align: center;
       text-wrap: balance;
-      max-width: 18ch;
+      max-width: 20ch;
     }
     .headline-line {
       display: block;
@@ -446,6 +465,17 @@
 
     /* Mobile & small screens */
     @media (max-width: 480px) {
+      .page-spotlight {
+        width: 520px;
+        height: 520px;
+        opacity: 0.72;
+        background:
+          radial-gradient(circle,
+            rgba(139, 92, 246, 0.12) 0%,
+            rgba(139, 92, 246, 0.06) 22%,
+            rgba(255, 255, 255, 0.03) 38%,
+            transparent 55%);
+      }
       body {
         padding: 1.25rem 1rem;
         padding-left: max(1rem, env(safe-area-inset-left));
@@ -519,6 +549,11 @@
 
     /* Very small phones */
     @media (max-width: 360px) {
+      .page-spotlight {
+        width: 420px;
+        height: 420px;
+        opacity: 0.6;
+      }
       body {
         padding: 1rem 0.75rem;
       }
@@ -588,6 +623,8 @@
     <span class="star" style="left: 85%; top: 45%;"></span>
   </div>
 
+  <div class="page-spotlight" aria-hidden="true"></div>
+
   <main class="page">
     <img src="logo.png" alt="ReStock Pro" class="logo" width="254" height="60" draggable="false">
     <h1 class="headline">
@@ -597,7 +634,7 @@
       </span>
       <span class="headline-line">again.</span>
     </h1>
-    <p class="tagline">Track products across stores and get notified <strong>instantly</strong> when they restock.</p>
+    <p class="tagline">Track products across stores and get notified <strong>the moment</strong> they restock.</p>
     <div class="hero-divider" aria-hidden="true"></div>
 
     <div id="successMessage" class="success-message" role="status">
@@ -616,7 +653,7 @@
         <input type="hidden" name="referrer" value="">
       </div>
       <button type="submit" id="submitBtn">Get Early Access</button>
-      <p class="social-proof">Early users will get lifetime perks.</p>
+      <p class="social-proof">Early users get lifetime perks.</p>
     </form>
     <p class="form-note">No spam. Just one email when we launch.</p>
 
@@ -673,7 +710,8 @@
           'a PS5 restock',
           'sneaker drops',
           'Pokémon TCG releases',
-          'limited product drops'
+          'limited product drops',
+          'items that sell out in seconds'
         ];
 
         var el = document.getElementById('rotatingText');
