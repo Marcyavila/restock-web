@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Support — ReStock Pro</title>
+  <meta name="description" content="Get help with ReStock Pro. FAQ and contact support for restock alerts and the Chrome extension.">
   <link rel="icon" type="image/png" href="icon16.png" sizes="16x16">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +19,8 @@
       --accent: #8b5cf6;
       --accent-hover: #9d6ffa;
       --border: rgba(255,255,255,0.06);
+      --radius: 12px;
+      --radius-sm: 8px;
     }
     * { box-sizing: border-box; }
     html { height: 100%; }
@@ -28,76 +31,188 @@
       font-size: 16px;
       font-weight: 400;
       color: var(--text);
-      background: var(--bg);
+      background: radial-gradient(ellipse 100% 70% at 50% -20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+        linear-gradient(180deg, #07080c 0%, #0a0c12 40%, #07080c 100%);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
     .wrap {
-      max-width: 720px;
+      max-width: 640px;
       margin: 0 auto;
-      padding: 2rem 1.5rem 4rem;
+      padding: 2.5rem 1.5rem 3rem;
     }
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 1.75rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .back:hover { color: var(--accent-hover); }
+    .back:visited { color: var(--text-secondary); }
+    .back:hover:visited { color: var(--accent-hover); }
     h1 {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
       font-weight: 700;
       margin: 0 0 0.5rem;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+    .lead {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin: 0 0 2rem;
+      line-height: 1.55;
     }
     h2 {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 600;
       margin: 2rem 0 0.75rem;
       color: var(--text);
+      letter-spacing: -0.01em;
     }
+    h2:first-of-type { margin-top: 0; }
     p {
       color: var(--text-secondary);
       margin: 0 0 0.75rem;
+      font-size: 0.9375rem;
     }
     a {
       color: var(--accent);
       text-decoration: none;
     }
     a:hover { color: var(--accent-hover); text-decoration: underline; }
-    .back {
-      display: inline-block;
-      margin-bottom: 1.5rem;
-      font-size: 0.9rem;
-      font-weight: 500;
+    .faq-list { margin: 0; padding: 0; list-style: none; }
+    .faq-item {
+      margin-bottom: 1rem;
+      padding: 1rem 1.15rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
     }
+    .faq-item dt {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      color: var(--text);
+      margin: 0 0 0.35rem;
+    }
+    .faq-item dd {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .contact-card {
+      margin-top: 1rem;
+      padding: 1.5rem 1.25rem;
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: var(--radius);
+    }
+    .contact-card p { margin-bottom: 0.5rem; }
     .support-email {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
       margin: 0.5rem 0 1rem;
-      font-size: 1.1rem;
+      padding: 0.65rem 1.1rem;
+      font-size: 1rem;
       font-weight: 600;
       color: var(--accent);
+      background: rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: background 0.2s ease, color 0.2s ease;
     }
-    .support-email:hover { color: var(--accent-hover); }
-    ul {
-      padding-left: 1.25rem;
+    .support-email:hover {
+      background: rgba(139, 92, 246, 0.22);
+      color: var(--accent-hover);
+      text-decoration: none;
+    }
+    .support-email::before {
+      content: "✉";
+      font-size: 1rem;
+    }
+    .response-time {
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+      margin-top: 0.25rem;
+    }
+    .tips {
+      margin: 1rem 0 0;
+      padding-left: 1.15rem;
+      font-size: 0.875rem;
       color: var(--text-secondary);
-      margin: 0 0 1rem;
     }
-    li { margin-bottom: 0.35rem; }
+    .tips li { margin-bottom: 0.25rem; }
+    .legal-note {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+    }
+    .legal-note a { color: var(--text-secondary); }
+    .legal-note a:hover { color: var(--accent-hover); }
+    .footer-links {
+      margin-top: 2.5rem;
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+    }
+    .footer-links a {
+      color: var(--text-secondary);
+    }
+    .footer-links a:hover { color: var(--accent-hover); }
   </style>
 </head>
 <body>
   <div class="wrap">
     <a href="/" class="back">← Back to ReStock Pro</a>
     <h1>Support</h1>
-    <p>Need help with ReStock Pro or have a question? We’re here for you.</p>
+    <p class="lead">Find answers below or reach out and we’ll get back to you.</p>
+
+    <h2>Frequently asked questions</h2>
+    <dl class="faq-list">
+      <div class="faq-item">
+        <dt>What is ReStock Pro?</dt>
+        <dd>ReStock Pro is a Chrome extension that monitors product pages (e.g. at Target and other stores) and notifies you when items restock or become available for preorder, so you don’t have to keep checking manually.</dd>
+      </div>
+      <div class="faq-item">
+        <dt>How do I get early access?</dt>
+        <dd>Join the waitlist on our homepage with your email. We’ll send one email when the extension is available on the Chrome Web Store. Early users get lifetime perks.</dd>
+      </div>
+      <div class="faq-item">
+        <dt>Alerts seem wrong or delayed—why?</dt>
+        <dd>We rely on how stores display their pages. If a site changes its layout or blocks automated checks, alerts can be delayed or incorrect. We’re always improving. If you see a specific product or store that’s off, tell us so we can look into it.</dd>
+      </div>
+      <div class="faq-item">
+        <dt>Which stores are supported?</dt>
+        <dd>We currently support Target and are working on more. If you have a store you’d like us to add, email us—we use that feedback to prioritize.</dd>
+      </div>
+    </dl>
 
     <h2>Contact us</h2>
-    <p>Email us at:</p>
-    <a href="mailto:support@getrestock.app" class="support-email">support@getrestock.app</a>
-    <p>We’ll do our best to get back to you within a few business days.</p>
+    <p>Couldn’t find what you need? Email us and we’ll help.</p>
+    <div class="contact-card">
+      <a href="mailto:support@getrestock.app" class="support-email">support@getrestock.app</a>
+      <p class="response-time">We aim to reply within a few business days.</p>
+      <p style="margin-top: 1rem; margin-bottom: 0.35rem;"><strong style="color: var(--text);">When you write, please include:</strong></p>
+      <ul class="tips">
+        <li>A short description of the issue or question</li>
+        <li>Your browser and version (e.g. Chrome 120)</li>
+        <li>For extension issues: the store and product page, and what you expected vs what happened</li>
+      </ul>
+    </div>
 
-    <h2>When you write, please include</h2>
-    <ul>
-      <li>A short description of the issue or question</li>
-      <li>Your browser and version (e.g. Chrome 120)</li>
-      <li>If it’s about the extension: the store or product page, and what you expected vs what happened</li>
-    </ul>
-    <p>For legal or privacy matters, use <a href="mailto:legal@getrestock.app">legal@getrestock.app</a> instead. See our <a href="/terms.html">Terms of Use</a> and <a href="/privacy.html">Privacy Policy</a> for more.</p>
+    <p class="legal-note">For legal or privacy matters, use <a href="mailto:legal@getrestock.app">legal@getrestock.app</a>. See our <a href="/terms.html">Terms of Use</a> and <a href="/privacy.html">Privacy Policy</a>.</p>
+
+    <p class="footer-links">
+      <a href="/">Home</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a>
+    </p>
   </div>
 </body>
 </html>
