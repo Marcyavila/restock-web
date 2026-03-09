@@ -375,6 +375,10 @@
       transition: box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out), filter 0.2s ease;
       position: relative;
       overflow: hidden;
+      -webkit-user-drag: none;
+      user-drag: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
     .waitlist-form button::before {
       content: "";
@@ -670,7 +674,7 @@
       <div class="hidden-fields" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;clip:rect(0,0,0,0);">
         <input type="hidden" name="referrer" value="">
       </div>
-      <button type="submit" id="submitBtn">Get Early Access</button>
+      <button type="submit" id="submitBtn" draggable="false">Get Early Access</button>
       <p class="social-proof">Early users get lifetime perks.</p>
     </form>
     <p class="form-note">No spam. Just one email when we launch.</p>
