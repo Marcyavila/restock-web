@@ -21,7 +21,7 @@
       --border-strong: rgba(255,255,255,0.08);
       --text: #f8f9fc;
       --text-secondary: rgba(248, 249, 252, 0.72);
-      --text-tertiary: rgba(248, 249, 252, 0.42);
+      --text-tertiary: rgba(248, 249, 252, 0.6);
       --accent: #8b5cf6;
       --accent-hover: #9d6ffa;
       --accent-glow: rgba(139, 92, 246, 0.28);
@@ -55,19 +55,6 @@
       padding: 2rem 1.5rem;
       position: relative;
       overflow-x: hidden;
-    }
-    /* Procedural noise overlay: overlay blend + higher opacity for contrast; baseFrequency 2.4 = fine grain. */
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 2;
-      pointer-events: none;
-      opacity: 0.06;
-      mix-blend-mode: overlay;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.4' numOctaves='4' result='t'/%3E%3CfeColorMatrix in='t' type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-      background-size: 256px 256px;
-      background-repeat: repeat;
     }
 
     /* Peek-style starfield */
@@ -212,24 +199,21 @@
     }
     @supports ((-webkit-background-clip: text) or (background-clip: text)) {
       .rotating-text {
-        background: linear-gradient(90deg, #ddd6fe 0%, #c4b5fd 32%, rgba(255,255,255,0.35) 38%, rgba(255,255,255,0.08) 42%, #8b5cf6 50%, #a78bfa 70%, #c4b5fd 100%);
-        background-size: 200% 100%;
+        background:
+          linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.2) 18%, transparent 38%, transparent 62%, rgba(255,255,255,0.15) 82%, transparent 100%),
+          linear-gradient(90deg, #ddd6fe 0%, #8b5cf6 45%, #a78bfa 100%);
+        background-size: 220% 100%, 100% 100%;
+        background-position: -10% 0, 0 0;
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
         -webkit-text-fill-color: transparent;
+        animation: rotating-text-shimmer 5s ease-in-out infinite;
       }
     }
-    @media (prefers-reduced-motion: no-preference) {
-      @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-        .rotating-text {
-          animation: text-shimmer 8s ease-in-out infinite;
-        }
-      }
-    }
-    @keyframes text-shimmer {
-      0% { background-position: 0% 0; }
-      100% { background-position: -100% 0; }
+    @keyframes rotating-text-shimmer {
+      0%, 100% { background-position: -10% 0, 0 0; }
+      50% { background-position: 110% 0, 0 0; }
     }
     .rotating-text.is-fading-out {
       opacity: 0;
@@ -417,7 +401,7 @@
 
     .form-note {
       font-size: 0.8125rem;
-      color: rgba(248, 249, 252, 0.6);
+      color: var(--text-tertiary);
       letter-spacing: 0.01em;
       margin: 0;
       -webkit-user-select: none;
@@ -489,6 +473,9 @@
         opacity: 0.5;
       }
       .email-input-wrap.shake {
+        animation: none;
+      }
+      .rotating-text {
         animation: none;
       }
     }
