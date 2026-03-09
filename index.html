@@ -285,6 +285,13 @@
       font-size: 0.75rem;
       color: var(--text-tertiary);
       letter-spacing: 0.02em;
+      text-align: center;
+    }
+    .footer-domain {
+      display: block;
+      margin-top: 0.35rem;
+      color: var(--text-tertiary);
+      opacity: 0.85;
     }
     .footer a {
       color: var(--accent-hover);
@@ -446,7 +453,8 @@
     <p class="form-note">No spam. Just one email when we launch.</p>
 
     <footer class="footer">
-      Coming soon to the <a href="https://chromewebstore.google.com" target="_blank" rel="noopener">Chrome Web Store</a> · getrestock.app
+      <a href="https://chromewebstore.google.com" target="_blank" rel="noopener">Chrome extension</a> launching soon
+      <span class="footer-domain">getrestock.app</span>
     </footer>
   </main>
   <iframe name="waitlistFrame" id="waitlistFrame" style="position:absolute;width:0;height:0;border:0;visibility:hidden" title="Waitlist submission"></iframe>
@@ -543,7 +551,6 @@
         var submitLoadHandler = null;
         var submitMessageHandler = null;
         var EXPECTED_ORIGIN = window.location.origin || (window.location.protocol + '//' + window.location.host);
-        var isLocalDev = (typeof window !== 'undefined' && window.location && /^(localhost|127\.0\.0\.1)$/i.test((window.location.hostname || '')));
         function isAllowedMessageOrigin(origin) {
           if (!origin || typeof origin !== 'string') return false;
           if (origin === EXPECTED_ORIGIN) return true;
@@ -551,7 +558,6 @@
           if (origin.indexOf('http://localhost') === 0 || origin.indexOf('http://127.0.0.1') === 0) return true;
           if (origin === 'https://script.google.com' || origin.indexOf('https://script.google.com') === 0) return true;
           if (origin.indexOf('https://script.googleusercontent.com') === 0) return true;
-          if (origin.indexOf('google') !== -1) return true;
           return false;
         }
         var SUCCESS_TIMEOUT_MS = 15000;
@@ -569,15 +575,6 @@
         }
 
         function onMessage(event) {
-          // #region agent log
-          try {
-            var o = event.origin || '';
-            var t = event.data && event.data.type;
-            var allowed = t === 'waitlist' && isAllowedMessageOrigin(o);
-            if (typeof console !== 'undefined' && console.log) console.log('[waitlist] message', { origin: o, type: t, allowed: allowed });
-            if (isLocalDev) fetch('http://127.0.0.1:7257/ingest/e75fbc0e-0051-4726-99dd-45bdb1611563',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'9304b4'},body:JSON.stringify({sessionId:'9304b4',location:'website/index.html:onMessage',message:'message',data:{origin:o,type:t,allowed:allowed},timestamp:Date.now(),hypothesisId:'H1'})}).catch(function(){});
-          } catch (e) {}
-          // #endregion
           if (!event.data || event.data.type !== 'waitlist') return;
           if (!isAllowedMessageOrigin(event.origin)) return;
           clearSubmitState();
@@ -602,10 +599,6 @@
           } catch (e) {
             href = '(cross-origin)';
           }
-          // #region agent log
-          if (typeof console !== 'undefined' && console.log) console.log('[waitlist] iframe load', { href: href.substring(0, 80), readOk: readOk });
-          if (isLocalDev) fetch('http://127.0.0.1:7257/ingest/e75fbc0e-0051-4726-99dd-45bdb1611563',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'9304b4'},body:JSON.stringify({sessionId:'9304b4',location:'website/index.html:onIframeLoad',message:'iframe load',data:{href: href.substring(0, 120), readOk: readOk},timestamp:Date.now(),hypothesisId:'H2'})}).catch(function(){});
-          // #endregion
           try {
             if (!readOk) return;
             if (href.indexOf(EXPECTED_ORIGIN) !== 0) return;
@@ -626,12 +619,6 @@
             /* cross-origin: iframe still on Apps Script; wait for redirect or timeout */
           }
         }
-
-        window.addEventListener('message', function(e) {
-          if (e.data && e.data.type === 'waitlist') {
-            if (typeof console !== 'undefined' && console.log) console.log('[waitlist] any waitlist message', e.origin, e.data);
-          }
-        });
 
         function sendToSheet(ip, location) {
           var postForm = document.createElement('form');
@@ -660,10 +647,6 @@
           window.addEventListener('message', submitMessageHandler);
 
           submitTimeout = setTimeout(function() {
-            // #region agent log
-            if (typeof console !== 'undefined' && console.log) console.log('[waitlist] timeout fired');
-            if (isLocalDev) fetch('http://127.0.0.1:7257/ingest/e75fbc0e-0051-4726-99dd-45bdb1611563',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'9304b4'},body:JSON.stringify({sessionId:'9304b4',location:'website/index.html:timeout',message:'timeout fired',data:{},timestamp:Date.now(),hypothesisId:'H3'})}).catch(function(){});
-            // #endregion
             if (!submitLoadHandler) return;
             clearSubmitState();
             showError('Request timed out. Please check your connection and try again.');
