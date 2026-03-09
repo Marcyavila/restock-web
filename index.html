@@ -199,30 +199,12 @@
     }
     @supports ((-webkit-background-clip: text) or (background-clip: text)) {
       .rotating-text {
-        background: linear-gradient(
-          110deg,
-          #8b5cf6 0%,
-          #8b5cf6 40%,
-          #ffffff 50%,
-          #8b5cf6 60%,
-          #8b5cf6 100%
-        );
-        background-size: 300% 100%;
-        background-position: 100% 50%;
+        background: linear-gradient(110deg, #c4b5fd 0%, #8b5cf6 50%, #a78bfa 100%);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
         -webkit-text-fill-color: transparent;
       }
-      @media (prefers-reduced-motion: no-preference) {
-        .rotating-text {
-          animation: textShimmer 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-      }
-    }
-    @keyframes textShimmer {
-      0% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
     }
     .rotating-text.is-fading-out {
       opacity: 0;
@@ -755,11 +737,6 @@
             idx = (idx + 1) % phrases.length;
             setPhrase(idx);
             el.classList.remove('is-fading-out');
-            if (!reduceMotion) {
-              el.style.animation = 'none';
-              el.offsetHeight;
-              el.style.animation = '';
-            }
           }, 220);
         }
 
