@@ -155,13 +155,18 @@
     }
     .headline-line {
       display: block;
-      opacity: 0.92;
+      font-size: 0.82em;
+      opacity: 0.78;
+      letter-spacing: -0.02em;
     }
     .rotating-wrap {
-      display: block;
-      min-height: 1.05em; /* fixed height to avoid layout jump */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 2.2em; /* fixed so box never changes height when phrase rotates */
       line-height: 1.06;
       margin: 0.08em auto 0.08em;
+      overflow: hidden;
     }
     .rotating-text {
       display: inline-block;
@@ -170,11 +175,12 @@
       opacity: 1;
       transform: translateY(0);
       color: #a78bfa; /* fallback */
-      font-size: 1.03em;
+      font-size: 1.18em;
+      letter-spacing: -0.03em;
     }
     @supports ((-webkit-background-clip: text) or (background-clip: text)) {
       .rotating-text {
-        background: linear-gradient(90deg, #c4b5fd 0%, #8b5cf6 55%, #a78bfa 100%);
+        background: linear-gradient(90deg, #ddd6fe 0%, #8b5cf6 45%, #a78bfa 100%);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -197,11 +203,15 @@
       margin-right: auto;
       text-align: center;
     }
+    .tagline strong {
+      font-weight: 700;
+      color: rgba(248, 249, 252, 0.92);
+    }
 
     .waitlist-form {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       margin-bottom: 1rem;
     }
     .hero-divider {
@@ -227,6 +237,19 @@
     .email-input-wrap {
       position: relative;
       width: 100%;
+    }
+    .email-input-wrap::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: calc(var(--radius-sm) + 2px);
+      pointer-events: none;
+      background: radial-gradient(120% 120% at 50% 0%, rgba(139, 92, 246, 0.16) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity 220ms var(--ease-out);
+    }
+    .email-input-wrap:focus-within::before {
+      opacity: 1;
     }
     .email-input-wrap.shake {
       animation: shake-kb 0.3s ease-in-out both;
@@ -274,6 +297,8 @@
       border-radius: var(--radius-sm);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
       transition: border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), background 0.2s ease;
+      position: relative;
+      z-index: 0;
     }
     .waitlist-form input[type="email"]:hover {
       border-color: rgba(255,255,255,0.14);
@@ -320,6 +345,16 @@
       cursor: pointer;
       box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset, 0 16px 46px rgba(139, 92, 246, 0.32);
       transition: box-shadow 0.3s var(--ease-out), transform 0.2s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+    .waitlist-form button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(120% 140% at 50% 0%, rgba(255,255,255,0.22) 0%, transparent 55%);
+      opacity: 0.7;
+      pointer-events: none;
     }
     .waitlist-form button:hover {
       box-shadow: 0 1px 0 rgba(255,255,255,0.14) inset, 0 22px 58px rgba(139, 92, 246, 0.40);
@@ -433,7 +468,7 @@
         text-wrap: balance;
       }
       .rotating-wrap {
-        min-height: 1.2em;
+        height: 2.15em;
       }
       .tagline {
         font-size: 0.875rem;
@@ -500,7 +535,7 @@
         margin-bottom: 0.45rem;
       }
       .rotating-wrap {
-        min-height: 1.22em;
+        height: 2.1em;
       }
       .tagline {
         font-size: 0.8125rem;
@@ -562,7 +597,7 @@
       </span>
       <span class="headline-line">again.</span>
     </h1>
-    <p class="tagline">Track products across stores and get notified instantly when they restock.</p>
+    <p class="tagline">Track products across stores and get notified <strong>instantly</strong> when they restock.</p>
     <div class="hero-divider" aria-hidden="true"></div>
 
     <div id="successMessage" class="success-message" role="status">
@@ -574,7 +609,7 @@
     <!-- action used when JS is off (progressive enhancement) -->
     <form id="waitlistForm" class="waitlist-form" action="/api/waitlist" method="post" novalidate>
       <div class="email-input-wrap" id="emailInputWrap">
-        <input type="email" name="email" id="email" placeholder="your@email.com" required autocomplete="email" aria-label="Email address">
+        <input type="email" name="email" id="email" placeholder="you@email.com" required autocomplete="email" aria-label="Email address">
         <div class="email-error-overlay" id="emailErrorOverlay" aria-hidden="true"></div>
       </div>
       <div class="hidden-fields" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;clip:rect(0,0,0,0);">
@@ -600,7 +635,7 @@
       var successEl = document.getElementById('successMessage');
       var errorEl = document.getElementById('errorMessage');
       var referrerInput = form ? form.querySelector('input[name="referrer"]') : null;
-      var defaultPlaceholder = 'your@email.com';
+      var defaultPlaceholder = 'you@email.com';
       var errorPlaceholder = 'Please enter a valid email address.';
       var placeholderTimeout = null;
 
@@ -637,7 +672,7 @@
         var phrases = [
           'a PS5 restock',
           'sneaker drops',
-          'Pokémon card releases',
+          'Pokémon TCG releases',
           'limited product drops'
         ];
 
