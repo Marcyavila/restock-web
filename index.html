@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ReStock Pro | Instant Restock Alerts</title>
+  <title>ReStock Pro ✦ Instant Restock Alerts</title>
   <meta name="description" content="Track products and get instant alerts when they restock. Stop checking pages manually.">
   <link rel="icon" type="image/png" href="icon16.png" sizes="16x16">
   <link rel="icon" type="image/png" href="icon48.png" sizes="48x48">
@@ -164,7 +164,7 @@
       font-weight: 800;
       color: var(--text);
       line-height: 1.06;
-      letter-spacing: -0.035em;
+      letter-spacing: -0.04em;
       margin: 0 auto 0.55rem;
       margin-left: auto;
       margin-right: auto;
@@ -199,12 +199,23 @@
     }
     @supports ((-webkit-background-clip: text) or (background-clip: text)) {
       .rotating-text {
-        background: linear-gradient(90deg, #ddd6fe 0%, #8b5cf6 45%, #a78bfa 100%);
+        background: linear-gradient(90deg, #ddd6fe 0%, #8b5cf6 20%, #a78bfa 40%, rgba(255,255,255,0.95) 50%, #a78bfa 60%, #8b5cf6 80%, #ddd6fe 100%);
+        background-size: 200% 100%;
+        background-position: 100% 50%;
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
         -webkit-text-fill-color: transparent;
       }
+      @media (prefers-reduced-motion: no-preference) {
+        .rotating-text {
+          animation: shimmer 4s ease-in-out infinite;
+        }
+      }
+    }
+    @keyframes shimmer {
+      0%, 100% { background-position: 100% 50%; }
+      50% { background-position: 0% 50%; }
     }
     .rotating-text.is-fading-out {
       opacity: 0;
@@ -376,11 +387,12 @@
       pointer-events: none;
     }
     .waitlist-form button:hover {
-      box-shadow: 0 1px 0 rgba(255,255,255,0.14) inset, 0 22px 58px rgba(139, 92, 246, 0.40);
-      transform: translateY(-1px);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4), 0 0 40px rgba(139, 92, 246, 0.2);
+      filter: brightness(1.1);
+      transform: translateY(-2px) scale(1.02);
     }
     .waitlist-form button:active {
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
       box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 2px 12px var(--accent-glow);
     }
     .waitlist-form button:disabled {
@@ -391,7 +403,7 @@
 
     .form-note {
       font-size: 0.8125rem;
-      color: var(--text-tertiary);
+      color: rgba(248, 249, 252, 0.6);
       letter-spacing: 0.01em;
       margin: 0;
       -webkit-user-select: none;
