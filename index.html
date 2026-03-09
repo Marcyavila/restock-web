@@ -402,14 +402,18 @@
 
     .success-message {
       display: none;
-      padding: 20px 24px;
-      font-size: 0.9375rem;
+      padding: 1.5rem 1.75rem;
+      font-size: 1rem;
       font-weight: 500;
+      line-height: 1.5;
+      letter-spacing: 0.01em;
       color: #86efac;
       background: rgba(34, 197, 94, 0.08);
       border: 1px solid rgba(34, 197, 94, 0.22);
       border-radius: var(--radius-sm);
-      margin-bottom: 1rem;
+      margin: 0 auto 1rem;
+      max-width: 28ch;
+      text-align: center;
     }
     .success-message.visible {
       display: block;
@@ -638,7 +642,7 @@
     <div class="hero-divider" aria-hidden="true"></div>
 
     <div id="successMessage" class="success-message" role="status">
-      You’re in. We’ll email you when ReStock Pro launches.
+      You’re in. We’ll email you when ReStock launches.
     </div>
 
     <div id="errorMessage" class="error-message" role="alert"></div>
