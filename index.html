@@ -567,6 +567,15 @@
         }
 
         function onMessage(event) {
+          // #region agent log
+          try {
+            var o = event.origin || '';
+            var t = event.data && event.data.type;
+            var allowed = t === 'waitlist' && isAllowedMessageOrigin(o);
+            if (typeof console !== 'undefined' && console.log) console.log('[waitlist] message', { origin: o, type: t, allowed: allowed });
+            fetch('http://127.0.0.1:7257/ingest/e75fbc0e-0051-4726-99dd-45bdb1611563',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'9304b4'},body:JSON.stringify({sessionId:'9304b4',location:'website/index.html:onMessage',message:'message',data:{origin:o,type:t,allowed:allowed},timestamp:Date.now(),hypothesisId:'H1'})}).catch(function(){});
+          } catch (e) {}
+          // #endregion
           if (!event.data || event.data.type !== 'waitlist') return;
           if (!isAllowedMessageOrigin(event.origin)) return;
           clearSubmitState();
@@ -583,8 +592,20 @@
 
         function onIframeLoad() {
           var frame = document.getElementById('waitlistFrame');
+          var href = '';
+          var readOk = false;
           try {
-            var href = frame && frame.contentWindow ? frame.contentWindow.location.href : '';
+            href = frame && frame.contentWindow ? frame.contentWindow.location.href : '';
+            readOk = true;
+          } catch (e) {
+            href = '(cross-origin)';
+          }
+          // #region agent log
+          if (typeof console !== 'undefined' && console.log) console.log('[waitlist] iframe load', { href: href.substring(0, 80), readOk: readOk });
+          fetch('http://127.0.0.1:7257/ingest/e75fbc0e-0051-4726-99dd-45bdb1611563',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'9304b4'},body:JSON.stringify({sessionId:'9304b4',location:'website/index.html:onIframeLoad',message:'iframe load',data:{href: href.substring(0, 120), readOk: readOk},timestamp:Date.now(),hypothesisId:'H2'})}).catch(function(){});
+          // #endregion
+          try {
+            if (!readOk) return;
             if (href.indexOf(EXPECTED_ORIGIN) !== 0) return;
             if (href.indexOf('joined=1') !== -1) {
               clearSubmitState();
@@ -603,6 +624,12 @@
             /* cross-origin: iframe still on Apps Script; wait for redirect or timeout */
           }
         }
+
+        window.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'waitlist') {
+            if (typeof console !== 'undefined' && console.log) console.log('[waitlist] any waitlist message', e.origin, e.data);
+          }
+        });
 
         function sendToSheet(ip, location) {
           var postForm = document.createElement('form');
@@ -630,6 +657,10 @@
           window.addEventListener('message', submitMessageHandler);
 
           submitTimeout = setTimeout(function() {
+            // #region agent log
+            if (typeof console !== 'undefined' && console.log) console.log('[waitlist] timeout fired');
+            fetch('http://127.0.0.1:7257/ingest/e75fbc0e-0051-4726-99dd-45bdb1611563',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'9304b4'},body:JSON.stringify({sessionId:'9304b4',location:'website/index.html:timeout',message:'timeout fired',data:{},timestamp:Date.now(),hypothesisId:'H3'})}).catch(function(){});
+            // #endregion
             if (!submitLoadHandler) return;
             clearSubmitState();
             showError('Request timed out. Please check your connection and try again.');
