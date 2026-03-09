@@ -141,31 +141,39 @@
     }
 
     .headline {
-      font-size: clamp(2rem, 3.0vw, 2.35rem);
+      font-size: clamp(1.9rem, 2.7vw, 2.2rem);
       font-weight: 800;
       color: var(--text);
-      line-height: 1.02;
+      line-height: 1.06;
       letter-spacing: -0.035em;
-      margin: 0 auto 0.55rem;
+      margin: 0 auto 0.75rem;
       margin-left: auto;
       margin-right: auto;
       text-align: center;
       text-wrap: balance;
+      max-width: 18ch;
     }
-    .subheadline {
-      font-size: clamp(1.2rem, 2.2vw, 1.55rem);
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
-      margin: 0 auto 0.9rem;
-      max-width: 40ch;
-      margin-left: auto;
-      margin-right: auto;
-      text-align: center;
-      color: #a78bfa;
+    .headline-line {
+      display: block;
+      opacity: 0.92;
+    }
+    .rotating-wrap {
+      display: block;
+      min-height: 1.05em; /* fixed height to avoid layout jump */
+      line-height: 1.06;
+      margin: 0.08em auto 0.08em;
+    }
+    .rotating-text {
+      display: inline-block;
+      will-change: opacity, transform;
+      transition: opacity 420ms var(--ease-out), transform 420ms var(--ease-out);
+      opacity: 1;
+      transform: translateY(0);
+      color: #a78bfa; /* fallback */
+      font-size: 1.03em;
     }
     @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-      .subheadline {
+      .rotating-text {
         background: linear-gradient(90deg, #c4b5fd 0%, #8b5cf6 55%, #a78bfa 100%);
         -webkit-background-clip: text;
         background-clip: text;
@@ -173,13 +181,17 @@
         -webkit-text-fill-color: transparent;
       }
     }
+    .rotating-text.is-fading-out {
+      opacity: 0;
+      transform: translateY(6px);
+    }
     .tagline {
       font-size: 0.9375rem;
       font-weight: 400;
       color: var(--text-secondary);
       line-height: 1.5;
       letter-spacing: 0.01em;
-      margin: 0 auto 1.6rem;
+      margin: 0 auto 1.35rem;
       max-width: 52ch;
       margin-left: auto;
       margin-right: auto;
@@ -191,6 +203,14 @@
       flex-direction: column;
       gap: 12px;
       margin-bottom: 1rem;
+    }
+    .hero-divider {
+      height: 1px;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto 1.1rem;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 20%, rgba(139,92,246,0.22) 50%, rgba(255,255,255,0.08) 80%, transparent 100%);
+      opacity: 0.65;
     }
     .social-proof {
       margin: 0.5rem 0 0;
@@ -412,15 +432,17 @@
         padding: 0 0.25rem;
         text-wrap: balance;
       }
-      .subheadline {
-        font-size: 1.125rem;
-        margin-bottom: 0.9rem;
-        padding: 0 0.25rem;
+      .rotating-wrap {
+        min-height: 1.2em;
       }
       .tagline {
         font-size: 0.875rem;
         margin-bottom: 1.5rem;
         padding: 0 0.25rem;
+      }
+      .hero-divider {
+        margin-bottom: 0.95rem;
+        opacity: 0.55;
       }
       .waitlist-form {
         gap: 10px;
@@ -477,13 +499,16 @@
         font-size: 1.5rem;
         margin-bottom: 0.45rem;
       }
-      .subheadline {
-        font-size: 1.02rem;
-        margin-bottom: 0.8rem;
+      .rotating-wrap {
+        min-height: 1.22em;
       }
       .tagline {
         font-size: 0.8125rem;
         margin-bottom: 1.25rem;
+      }
+      .hero-divider {
+        margin-bottom: 0.85rem;
+        opacity: 0.5;
       }
       .waitlist-form input[type="email"],
       .waitlist-form button {
@@ -530,9 +555,15 @@
 
   <main class="page">
     <img src="logo.png" alt="ReStock Pro" class="logo" width="254" height="60" draggable="false">
-    <h1 class="headline">Never miss a restock again.</h1>
-    <p class="subheadline">Get alerts the moment it happens.</p>
+    <h1 class="headline">
+      <span class="headline-line">Never miss</span>
+      <span class="rotating-wrap">
+        <span class="rotating-text" id="rotatingText">a PS5 restock</span>
+      </span>
+      <span class="headline-line">again.</span>
+    </h1>
     <p class="tagline">Track products across stores and get notified instantly when they restock.</p>
+    <div class="hero-divider" aria-hidden="true"></div>
 
     <div id="successMessage" class="success-message" role="status">
       You’re in. We’ll email you when ReStock Pro launches.
@@ -601,6 +632,60 @@
         var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return typeof str === 'string' && str.length > 0 && re.test(str);
       }
+
+      (function setupRotatingHeadline() {
+        var phrases = [
+          'a PS5 restock',
+          'sneaker drops',
+          'Pokémon card releases',
+          'limited product drops'
+        ];
+
+        var el = document.getElementById('rotatingText');
+        if (!el) return;
+
+        var mql = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+        var reduceMotion = !!(mql && mql.matches);
+        var idx = 0;
+        var intervalId = null;
+
+        function setPhrase(i) {
+          el.textContent = phrases[i % phrases.length];
+        }
+
+        function tick() {
+          el.classList.add('is-fading-out');
+          window.setTimeout(function() {
+            idx = (idx + 1) % phrases.length;
+            setPhrase(idx);
+            el.classList.remove('is-fading-out');
+          }, 220);
+        }
+
+        setPhrase(idx);
+
+        function start() {
+          if (reduceMotion) return;
+          if (intervalId) return;
+          intervalId = window.setInterval(tick, 2800);
+        }
+
+        function stop() {
+          if (!intervalId) return;
+          window.clearInterval(intervalId);
+          intervalId = null;
+        }
+
+        if (mql && mql.addEventListener) {
+          mql.addEventListener('change', function(e) {
+            reduceMotion = !!e.matches;
+            if (reduceMotion) stop();
+            else start();
+          });
+        }
+
+        start();
+      })();
 
       form.addEventListener('submit', function(e) {
         e.preventDefault();
