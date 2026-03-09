@@ -540,15 +540,13 @@
 
     <div id="errorMessage" class="error-message" role="alert"></div>
 
-    <!-- action used when JS is off (progressive enhancement); keep in sync with WAITLIST_ENDPOINT in script -->
-    <form id="waitlistForm" class="waitlist-form" action="https://script.google.com/macros/s/AKfycbyXiERWSL2YHE8w5Pz91gmVzD3y1QXESkFlh9GHHxLHQxYoUXV2aM7bODTxsN-UlTtI/exec" method="post" novalidate>
+    <!-- action used when JS is off (progressive enhancement) -->
+    <form id="waitlistForm" class="waitlist-form" action="/api/waitlist" method="post" novalidate>
       <div class="email-input-wrap" id="emailInputWrap">
         <input type="email" name="email" id="email" placeholder="your@email.com" required autocomplete="email" aria-label="Email address">
         <div class="email-error-overlay" id="emailErrorOverlay" aria-hidden="true"></div>
       </div>
       <div class="hidden-fields" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;clip:rect(0,0,0,0);">
-        <input type="hidden" name="ip" value="">
-        <input type="hidden" name="location" value="">
         <input type="hidden" name="referrer" value="">
       </div>
       <button type="submit" id="submitBtn">Get Early Access</button>
@@ -561,21 +559,8 @@
       <span class="footer-domain">getrestock.app</span>
     </footer>
   </main>
-  <iframe name="waitlistFrame" id="waitlistFrame" style="position:absolute;width:0;height:0;border:0;visibility:hidden" title="Waitlist submission"></iframe>
-
   <script>
     (function() {
-      if (window.self === window.top) return;
-      var q = window.location.search || '';
-      if (q.indexOf('joined=1') !== -1) window.parent.postMessage({ type: 'waitlist', success: true }, '*');
-      else if (q.indexOf('error=1') !== -1) window.parent.postMessage({ type: 'waitlist', success: false }, '*');
-    })();
-  </script>
-  <script>
-    (function() {
-      // Google Apps Script web app URL — waitlist emails are saved to your sheet.
-      var WAITLIST_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyXiERWSL2YHE8w5Pz91gmVzD3y1QXESkFlh9GHHxLHQxYoUXV2aM7bODTxsN-UlTtI/exec';
-
       var form = document.getElementById('waitlistForm');
       var emailInput = document.getElementById('email');
       var emailInputWrap = document.getElementById('emailInputWrap');
@@ -583,6 +568,7 @@
       var submitBtn = document.getElementById('submitBtn');
       var successEl = document.getElementById('successMessage');
       var errorEl = document.getElementById('errorMessage');
+      var referrerInput = form ? form.querySelector('input[name="referrer"]') : null;
       var defaultPlaceholder = 'your@email.com';
       var errorPlaceholder = 'Please enter a valid email address.';
       var placeholderTimeout = null;
@@ -641,162 +627,36 @@
         submitBtn.textContent = 'Joining…';
         errorEl.classList.remove('visible');
 
-        if (!WAITLIST_ENDPOINT) {
-          showSuccess();
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Get Early Access';
-          return;
-        }
-
         var referrer = (typeof document !== 'undefined' && document.referrer) ? document.referrer.trim() : '';
         if (!referrer) referrer = '(direct)';
+        if (referrerInput) referrerInput.value = referrer;
 
-        var submitTimeout = null;
-        var submitLoadHandler = null;
-        var submitMessageHandler = null;
-        var EXPECTED_ORIGIN = window.location.origin || (window.location.protocol + '//' + window.location.host);
-        function isAllowedMessageOrigin(origin) {
-          if (!origin || typeof origin !== 'string') return false;
-          if (origin === EXPECTED_ORIGIN) return true;
-          if (origin === 'https://getrestock.app' || origin.indexOf('https://getrestock.app:') === 0) return true;
-          if (origin.indexOf('http://localhost') === 0 || origin.indexOf('http://127.0.0.1') === 0) return true;
-          if (origin === 'https://script.google.com' || origin.indexOf('https://script.google.com') === 0) return true;
-          if (origin.indexOf('https://script.googleusercontent.com') === 0) return true;
-          return false;
-        }
         var SUCCESS_TIMEOUT_MS = 15000;
+        var abort = new AbortController();
+        var timeout = setTimeout(function() { abort.abort(); }, SUCCESS_TIMEOUT_MS);
 
-        function clearSubmitState() {
-          if (submitTimeout) { clearTimeout(submitTimeout); submitTimeout = null; }
-          if (submitLoadHandler && document.getElementById('waitlistFrame')) {
-            document.getElementById('waitlistFrame').removeEventListener('load', submitLoadHandler);
-            submitLoadHandler = null;
-          }
-          if (submitMessageHandler && window.removeEventListener) {
-            window.removeEventListener('message', submitMessageHandler);
-            submitMessageHandler = null;
-          }
-        }
-
-        function onMessage(event) {
-          if (!event.data || event.data.type !== 'waitlist') return;
-          if (!isAllowedMessageOrigin(event.origin)) return;
-          clearSubmitState();
-          if (event.data.success) {
-            showSuccess();
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Get Early Access';
-          } else {
-            showError('Something went wrong. Please try again.');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Get Early Access';
-          }
-        }
-
-        function onIframeLoad() {
-          var frame = document.getElementById('waitlistFrame');
-          var href = '';
-          var readOk = false;
-          try {
-            href = frame && frame.contentWindow ? frame.contentWindow.location.href : '';
-            readOk = true;
-          } catch (e) {
-            href = '(cross-origin)';
-          }
-          try {
-            if (!readOk) return;
-            if (href.indexOf(EXPECTED_ORIGIN) !== 0) return;
-            if (href.indexOf('joined=1') !== -1) {
-              clearSubmitState();
-              showSuccess();
-              submitBtn.disabled = false;
-              submitBtn.textContent = 'Get Early Access';
-              return;
-            }
-            if (href.indexOf('error=1') !== -1) {
-              clearSubmitState();
-              showError('Something went wrong. Please try again.');
-              submitBtn.disabled = false;
-              submitBtn.textContent = 'Get Early Access';
-            }
-          } catch (e) {
-            /* cross-origin: iframe still on Apps Script; wait for redirect or timeout */
-          }
-        }
-
-        function sendToSheet(ip, location) {
-          var postForm = document.createElement('form');
-          postForm.method = 'POST';
-          postForm.action = WAITLIST_ENDPOINT;
-          postForm.target = 'waitlistFrame';
-          postForm.style.display = 'none';
-
-          function addInput(name, value) {
-            var input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = value;
-            postForm.appendChild(input);
-          }
-          addInput('email', email);
-          addInput('ip', ip || '');
-          addInput('location', location || '');
-          addInput('referrer', referrer || '');
-          addInput('origin', EXPECTED_ORIGIN || '');
-
-          clearSubmitState();
-          submitLoadHandler = onIframeLoad;
-          submitMessageHandler = onMessage;
-          document.getElementById('waitlistFrame').addEventListener('load', submitLoadHandler);
-          window.addEventListener('message', submitMessageHandler);
-
-          submitTimeout = setTimeout(function() {
-            if (!submitLoadHandler) return;
-            clearSubmitState();
-            showError('Request timed out. Please check your connection and try again.');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Get Early Access';
-          }, SUCCESS_TIMEOUT_MS);
-
-          document.body.appendChild(postForm);
-          postForm.submit();
-          document.body.removeChild(postForm);
-        }
-
-        function tryFallbackIpApi() {
-          fetch('https://ipinfo.io/json')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-              var ip = (data && data.ip) ? String(data.ip).trim() : '';
-              var parts = [];
-              if (data && data.city) parts.push(data.city);
-              if (data && data.region) parts.push(data.region);
-              if (data && data.country) parts.push(data.country);
-              var location = parts.length ? parts.join(', ') : '';
-              sendToSheet(ip, location);
-            })
-            .catch(function() {
-              sendToSheet('', '');
-            });
-        }
-
-        fetch('https://ipapi.co/json/')
-          .then(function(r) { return r.json(); })
+        fetch('/api/waitlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, referrer: referrer }),
+          signal: abort.signal
+        })
+          .then(function(r) {
+            if (!r.ok) throw new Error('bad');
+            return r.json().catch(function() { return { ok: true }; });
+          })
           .then(function(data) {
-            var ip = (data && data.ip) ? data.ip : '';
-            var parts = [];
-            if (data && data.city) parts.push(data.city);
-            if (data && data.region) parts.push(data.region);
-            if (data && data.country_name) parts.push(data.country_name);
-            var location = parts.length ? parts.join(', ') : '';
-            if (ip || location) {
-              sendToSheet(ip, location);
-            } else {
-              tryFallbackIpApi();
-            }
+            clearTimeout(timeout);
+            if (data && data.ok) showSuccess();
+            else showError('Something went wrong. Please try again.');
           })
           .catch(function() {
-            tryFallbackIpApi();
+            clearTimeout(timeout);
+            showError('Request timed out. Please check your connection and try again.');
+          })
+          .finally(function() {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Get Early Access';
           });
       });
     })();
