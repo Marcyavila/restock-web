@@ -31,24 +31,30 @@ function doPost(e) {
   var ip = (params.ip || '').trim();
   var location = (params.location || '').trim();
   var referrer = (params.referrer || '').trim();
+  var origin = (params.origin || '').trim();
 
   if (!email) {
-    return createPostMessagePage(false);
+    return createPostMessagePage(false, origin);
   }
 
   // Column order: A=Email, B=Location, C=IP, D=Referrer, E=Date (date last)
   sheet.appendRow([email, location, ip, referrer, new Date()]);
-  return createPostMessagePage(true);
+  return createPostMessagePage(true, origin);
 }
 
-// Tell the parent (postMessage) and redirect iframe so parent can detect success via same-origin load.
-function createPostMessagePage(success) {
-  var json = success ? '{"type":"waitlist","success":true}' : '{"type":"waitlist","success":false}';
+// Redirect iframe to the same origin as the parent so the parent can read the URL (same-origin).
+function createPostMessagePage(success, redirectOrigin) {
   var q = success ? 'joined=1' : 'error=1';
+  var base = 'https://getrestock.app';
+  if (redirectOrigin && (redirectOrigin.indexOf('https://getrestock.app') === 0 || redirectOrigin.indexOf('https://www.getrestock.app') === 0)) {
+    base = redirectOrigin.replace(/\/$/, '');
+  }
+  var redirectUrl = base + '?' + q;
+  var json = success ? '{"type":"waitlist","success":true}' : '{"type":"waitlist","success":false}';
   return HtmlService.createHtmlOutput(
     '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><p>Thanks. You\'re on the list.</p>' +
     '<script>try { (window.top || window.parent).postMessage(' + json + ', "*"); } catch (e) {}' +
-    'setTimeout(function(){ window.location.href = "https://getrestock.app?' + q + '"; }, 150);</script></body></html>'
+    'setTimeout(function(){ window.location.href = "' + redirectUrl.replace(/"/g, '\\"') + '"; }, 150);</script></body></html>'
   ).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 ```
