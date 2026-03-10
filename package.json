@@ -1,0 +1,13 @@
+{
+  "name": "restock-pro",
+  "version": "1.0.5",
+  "private": true,
+  "scripts": {
+    "dev": "convex dev",
+    "deploy": "convex deploy",
+    "convex:init": "convex init"
+  },
+  "devDependencies": {
+    "convex": "^1.21.0"
+  }
+}

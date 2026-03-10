@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "ReStock Pro",
+  "version": "1.0.5",
+  "author": "Marcy Avila",
+  "description": "Monitor product availability and receive alerts when monitored items restock.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications",
+    "tabs",
+    "windows",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "https://redsky.target.com/*",
+    "https://www.target.com/*",
+    "https://target.scene7.com/*",
+    "https://goto.target.com/*",
+    "https://getrestock.app/*",
+    "https://*.convex.site/*",
+    "http://127.0.0.1:7287/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://getrestock.app/auth/extension-callback*"],
+      "js": ["auth-callback.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; img-src * data:;"
+  }
+}
