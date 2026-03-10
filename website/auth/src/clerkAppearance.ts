@@ -1,8 +1,21 @@
 /**
  * Clerk appearance: premium dark theme aligned with ReStock Pro extension.
- * Silicon Valley–grade: refined dark UI, purple accent, Plus Jakarta Sans.
+ * Uses Clerk's dark base theme so components render dark; variables tune colors and typography.
  */
+import { dark } from "@clerk/ui/themes";
+
 export const clerkAppearance = {
+  theme: dark,
+  options: {
+    logoImageUrl: "https://getrestock.app/logospb.png",
+    logoPlacement: "inside",
+    socialButtonsPlacement: "top",
+    socialButtonsVariant: "blockButton",
+  },
+  elements: {
+    headerTitle: "auth-clerk-header-hidden",
+    headerSubtitle: "auth-clerk-header-hidden",
+  },
   variables: {
     colorPrimary: "#7c3aed",
     colorBackground: "#151518",

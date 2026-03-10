@@ -1,12 +1,60 @@
 import React, { useEffect } from "react";
 import { SignIn, useAuth, useClerk } from "@clerk/clerk-react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { clerkAppearance } from "./clerkAppearance";
+
+// #region agent log
+function _debugLog(message: string, data: Record<string, unknown>, hypothesisId: string) {
+  fetch("http://127.0.0.1:7257/ingest/271ef3f9-406e-477b-901e-da630fdc4f5b", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "9304b4" },
+    body: JSON.stringify({ sessionId: "9304b4", location: "App.tsx", message, data, hypothesisId, timestamp: Date.now() }),
+  }).catch(() => {});
+}
+// #endregion
 
 const logoUrl =
   typeof window !== "undefined" ? `${window.location.origin}/logospb.png` : "/logospb.png";
 
 /** Full-page premium layout: gradient background, branding, centered card. */
 function AuthLayout({ children }: { children: React.ReactNode }) {
+  // #region agent log
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const card = document.querySelector(".auth-layout__card");
+      const cardFirst = card?.firstElementChild;
+      const headerLike = Array.from(document.querySelectorAll("*")).find((el) => el.textContent?.includes("Sign in to"));
+      const colorScheme = document.documentElement ? getComputedStyle(document.documentElement).colorScheme : "";
+      const sheetHrefs = Array.from(document.styleSheets)
+        .map((s) => (s as CSSStyleSheet).href || "")
+        .filter(Boolean);
+      _debugLog("DOM and env", {
+        cardExists: !!card,
+        cardFirstClassName: cardFirst?.className ?? null,
+        headerLikeClassName: headerLike?.className ?? null,
+        headerLikeTag: headerLike?.tagName ?? null,
+        headerLikeDisplay: headerLike ? getComputedStyle(headerLike).display : null,
+        colorScheme,
+        styleSheetCount: document.styleSheets.length,
+        sheetHrefsSample: sheetHrefs.slice(0, 5),
+        inIframe: window.self !== window.top,
+        locationHref: window.location.href,
+      }, "H2");
+      _debugLog("appearance config", {
+        hasTheme: !!clerkAppearance.theme,
+        themeKeys: clerkAppearance.theme ? Object.keys(clerkAppearance.theme as object).slice(0, 5) : [],
+        elementsKeys: Object.keys(clerkAppearance.elements || {}),
+        optionsKeys: Object.keys(clerkAppearance.options || {}),
+      }, "H3");
+      _debugLog("build/cache", {
+        colorScheme,
+        hasAuthLayoutCard: !!document.querySelector(".auth-layout__card"),
+        bodyBg: document.body ? getComputedStyle(document.body).background?.slice(0, 50) : null,
+      }, "H1");
+    }, 1500);
+    return () => clearTimeout(t);
+  }, []);
+  // #endregion
   return (
     <div className="auth-page">
       <div className="auth-layout__brand">
