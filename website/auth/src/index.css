@@ -140,28 +140,6 @@ body {
   color: var(--auth-text);
 }
 
-.auth-iframe-banner {
-  padding: 10px 16px;
-  background: rgba(124, 58, 237, 0.12);
-  border-bottom: 1px solid var(--auth-border);
-  color: #c4b5fd;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  text-align: center;
-  font-family: var(--auth-font);
-}
-
-.auth-iframe-banner__link {
-  color: #a78bfa;
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.auth-iframe-banner__link:hover {
-  color: #c4b5fd;
-}
-
 /* Clerk component overrides — premium card and controls */
 .auth-layout__card [class*="cl-rootBox"],
 .auth-layout__card [class*="cl-cardBox"],
@@ -174,26 +152,62 @@ body {
   box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.03) !important;
 }
 
+/* Primary button (Continue) */
 .auth-layout__card [class*="cl-formButtonPrimary"],
-.auth-layout__card [class*="cl-socialButtonsBlockButton"] button,
-[class*="cl-formButtonPrimary"],
-[class*="cl-socialButtonsBlockButton"] button {
+[class*="cl-formButtonPrimary"] {
   border-radius: 10px !important;
   font-weight: 600 !important;
+  font-family: var(--auth-font) !important;
   background: var(--auth-accent) !important;
   color: #fff !important;
   border: none !important;
-  transition: background-color 0.2s ease, transform 0.05s ease !important;
+  padding: 12px 20px !important;
+  min-height: 44px !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease, transform 0.05s ease, box-shadow 0.2s ease !important;
 }
 
 .auth-layout__card [class*="cl-formButtonPrimary"]:hover,
-.auth-layout__card [class*="cl-socialButtonsBlockButton"] button:hover,
-[class*="cl-formButtonPrimary"]:hover,
-[class*="cl-socialButtonsBlockButton"] button:hover {
+[class*="cl-formButtonPrimary"]:hover {
   background: var(--auth-accent-hover) !important;
   transform: translateY(-0.5px);
 }
 
+.auth-layout__card [class*="cl-formButtonPrimary"]:focus-visible,
+[class*="cl-formButtonPrimary"]:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--auth-surface), 0 0 0 4px var(--auth-accent) !important;
+}
+
+/* Social buttons (Discord, Google) */
+.auth-layout__card [class*="cl-socialButtonsBlockButton"] button,
+[class*="cl-socialButtonsBlockButton"] button {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-family: var(--auth-font) !important;
+  background: var(--auth-surface-elevated) !important;
+  color: var(--auth-text) !important;
+  border: 1px solid var(--auth-border) !important;
+  padding: 12px 20px !important;
+  min-height: 44px !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.05s ease !important;
+}
+
+.auth-layout__card [class*="cl-socialButtonsBlockButton"] button:hover,
+[class*="cl-socialButtonsBlockButton"] button:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  transform: translateY(-0.5px);
+}
+
+.auth-layout__card [class*="cl-socialButtonsBlockButton"] button:focus-visible,
+[class*="cl-socialButtonsBlockButton"] button:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--auth-surface), 0 0 0 4px var(--auth-accent) !important;
+}
+
+/* Inputs */
 .auth-layout__card [class*="cl-formFieldInput"] input,
 .auth-layout__card [class*="cl-input"],
 [class*="cl-formFieldInput"] input,
@@ -201,7 +215,19 @@ body {
   border-radius: 10px !important;
   background: var(--auth-surface-elevated) !important;
   color: var(--auth-text) !important;
-  border-color: var(--auth-border) !important;
+  border: 1px solid var(--auth-border) !important;
+  padding: 12px 14px !important;
+  min-height: 44px !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.auth-layout__card [class*="cl-formFieldInput"] input:focus,
+.auth-layout__card [class*="cl-input"]:focus,
+[class*="cl-formFieldInput"] input:focus,
+[class*="cl-input"]:focus {
+  outline: none !important;
+  border-color: var(--auth-accent) !important;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25) !important;
 }
 
 .auth-layout__card [class*="cl-headerTitle"],
@@ -218,15 +244,27 @@ body {
   color: var(--auth-text-secondary) !important;
 }
 
-/* Social buttons: dark bordered style */
-.auth-layout__card [class*="cl-socialButtonsBlockButton"] button,
-[class*="cl-socialButtonsBlockButton"] button {
-  background: transparent !important;
-  color: var(--auth-text) !important;
-  border: 1px solid var(--auth-border) !important;
+/* Footer links (Sign up, Sign in) */
+.auth-layout__card a[href],
+.auth-layout__card [class*="cl-footerAction"] a,
+[class*="cl-footerAction"] a {
+  color: var(--auth-accent-hover) !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease, text-decoration 0.15s ease !important;
 }
 
-.auth-layout__card [class*="cl-socialButtonsBlockButton"] button:hover,
-[class*="cl-socialButtonsBlockButton"] button:hover {
-  background: var(--auth-surface-elevated) !important;
+.auth-layout__card a[href]:hover,
+.auth-layout__card [class*="cl-footerAction"] a:hover,
+[class*="cl-footerAction"] a:hover {
+  color: #c4b5fd !important;
+  text-decoration: underline !important;
+}
+
+.auth-layout__card a[href]:focus-visible,
+[class*="cl-footerAction"] a:focus-visible {
+  outline: none !important;
+  text-decoration: underline !important;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--auth-accent) !important;
 }

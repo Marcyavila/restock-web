@@ -179,24 +179,9 @@ function LogoutDone() {
 // Force redirect to /auth/connect after sign-in so we can pass token to extension (full URL so Clerk respects it)
 const connectUrl = typeof window !== "undefined" ? `${window.location.origin}/auth/connect` : "/auth/connect";
 
-/** When embedded in the extension popup iframe, Google/Discord OAuth may not work; offer opening in a new tab. */
-function IframeBanner() {
-  if (typeof window === "undefined" || window.self === window.top) return null;
-  const authUrl = `${window.location.origin}/auth?from_extension=1`;
-  return (
-    <div className="auth-iframe-banner">
-      <span className="auth-iframe-banner__text">Using Google or Discord?</span>{" "}
-      <a href={authUrl} target="_blank" rel="noopener noreferrer" className="auth-iframe-banner__link">
-        Open in new tab
-      </a>
-    </div>
-  );
-}
-
 export default function App() {
   return (
     <ForceSignInIfFromExtension>
-      <IframeBanner />
       <Routes>
         <Route
           path="/"
