@@ -1,0 +1,2 @@
+# Don't deploy the auth app source — only auth-build (the built app) is served at /auth
+auth
