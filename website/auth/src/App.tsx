@@ -9,8 +9,8 @@ function ConnectExtension() {
     if (!isLoaded || !isSignedIn) return;
     getToken().then((token) => {
       if (token) {
-        const base = window.location.origin + window.location.pathname.replace(/\/$/, "");
-        const callbackUrl = `${base}/extension-callback?token=${encodeURIComponent(token)}`;
+        const authRoot = `${window.location.origin}/auth`;
+        const callbackUrl = `${authRoot}/extension-callback?token=${encodeURIComponent(token)}`;
         window.location.href = callbackUrl;
       }
     });
