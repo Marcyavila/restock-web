@@ -1,4 +1,8 @@
 {
+  "headers": [
+    { "source": "/auth/(.*)", "headers": [{ "key": "Content-Security-Policy", "value": "frame-ancestors 'self' https://getrestock.app https://www.getrestock.app chrome-extension:" }] },
+    { "source": "/auth", "headers": [{ "key": "Content-Security-Policy", "value": "frame-ancestors 'self' https://getrestock.app https://www.getrestock.app chrome-extension:" }] }
+  ],
   "rewrites": [
     { "source": "/auth/assets/:path*", "destination": "/auth-build/assets/:path*" },
     { "source": "/auth", "destination": "/auth-build/index.html" },

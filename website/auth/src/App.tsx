@@ -60,9 +60,22 @@ function ConnectExtension() {
 }
 
 function ExtensionCallback() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+    if (!token) return;
+    if (window.self !== window.top) {
+      try {
+        window.parent.postMessage({ type: "AUTH_CALLBACK", token }, "*");
+      } catch (_) {}
+    }
+  }, [location.search]);
+
   return (
     <div style={{ padding: 48, textAlign: "center", color: "#fafafa", fontFamily: "system-ui" }}>
-      <p>You can close this tab and return to the ReStock Pro extension.</p>
+      <p>{window.self !== window.top ? "Signed in! The extension will update." : "You can close this tab and return to the ReStock Pro extension."}</p>
     </div>
   );
 }
@@ -99,9 +112,24 @@ function LogoutDone() {
 // Force redirect to /auth/connect after sign-in so we can pass token to extension (full URL so Clerk respects it)
 const connectUrl = typeof window !== "undefined" ? `${window.location.origin}/auth/connect` : "/auth/connect";
 
+/** When embedded in the extension popup iframe, Google/Discord OAuth may not work; offer opening in a new tab. */
+function IframeBanner() {
+  if (typeof window === "undefined" || window.self === window.top) return null;
+  const authUrl = `${window.location.origin}/auth?from_extension=1`;
+  return (
+    <div style={{ padding: "8px 16px", background: "rgba(124, 58, 237, 0.15)", color: "#c4b5fd", fontSize: 13, textAlign: "center" }}>
+      Using Google or Discord?{" "}
+      <a href={authUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#a78bfa", fontWeight: 600 }}>
+        Open in new tab
+      </a>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <ForceSignInIfFromExtension>
+      <IframeBanner />
       <Routes>
         <Route path="/" element={<SignIn forceRedirectUrl={connectUrl} signUpUrl="/auth/sign-up" />} />
         <Route path="/sign-up" element={<SignIn signUpForceRedirectUrl={connectUrl} signInUrl="/auth" />} />

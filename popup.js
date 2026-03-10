@@ -590,24 +590,18 @@ function setBgStyle(value) {
   }
   setLoggedIn(!!authToken);
 
-  const AUTH_URL = "https://getrestock.app/auth?from_extension=1";
   function initLoginGate() {
-    const gateTitle = document.querySelector(".login-gate-text");
-    const gateSub = document.querySelector(".login-gate-sub");
-    const btnGoogle = document.getElementById("loginGateGoogle");
-    const btnDiscord = document.getElementById("loginGateDiscord");
-    const btnEmail = document.getElementById("loginGateEmail");
-    if (gateTitle) gateTitle.textContent = t("loginGateTitle");
-    if (gateSub) gateSub.textContent = t("loginGateSub");
-    [btnGoogle, btnDiscord, btnEmail].forEach((btn) => {
-      if (!btn) return;
-      if (btn === btnGoogle) btn.textContent = t("continueWithGoogle");
-      else if (btn === btnDiscord) btn.textContent = t("continueWithDiscord");
-      else if (btn === btnEmail) btn.textContent = t("signInWithEmail");
-      btn.addEventListener("click", () => { chrome.tabs.create({ url: AUTH_URL }); });
+    window.addEventListener("message", function (event) {
+      if (event.origin !== "https://getrestock.app" && event.origin !== "https://www.getrestock.app") return;
+      if (event.data && event.data.type === "AUTH_CALLBACK" && event.data.token) {
+        chrome.storage.local.set({ authToken: event.data.token }, () => {
+          setLoggedIn(true);
+          fetchUserPlan().then(updateAccountUI);
+        });
+      }
     });
   }
-  if (!authToken) initLoginGate();
+  initLoginGate();
 
   if (document.body.classList.contains("standalone-mode")) {
     const mainWrapper = document.getElementById("mainWrapper");
