@@ -21,6 +21,7 @@
       --border: rgba(255,255,255,0.06);
       --radius: 12px;
       --radius-sm: 8px;
+      --radius-lg: 16px;
     }
     * { box-sizing: border-box; }
     html { height: 100%; }
@@ -53,6 +54,23 @@
       max-width: 760px;
       margin: 0 auto;
       padding: clamp(1.5rem, 4vw, 2.5rem) 1.25rem 4.25rem;
+    }
+    .main-surface {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      backdrop-filter: blur(6px);
+      position: relative;
+      overflow: hidden;
+    }
+    .main-surface::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.015;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
     .back {
       display: inline-flex;
@@ -91,7 +109,7 @@
     h2 {
       font-size: 0.95rem;
       font-weight: 700;
-      margin: 2.35rem 0 0.8rem;
+      margin: 3rem 0 0.8rem;
       color: var(--text);
       letter-spacing: 0.02em;
       text-transform: uppercase;
@@ -121,6 +139,63 @@
       text-decoration: none;
     }
     a:hover { color: var(--accent-hover); text-decoration: underline; }
+    .quick-troubleshoot {
+      margin: 0 0 2rem;
+      padding: 1.25rem 1.35rem;
+      background: rgba(139, 92, 246, 0.06);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+    }
+    .quick-troubleshoot h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 0.6rem;
+    }
+    .quick-troubleshoot p, .quick-troubleshoot ul {
+      margin: 0;
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .quick-troubleshoot ul { padding-left: 1.2rem; margin-top: 0.35rem; }
+    .install-card {
+      margin: 0 0 2rem;
+      padding: 1.25rem 1.35rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .install-card p { margin: 0; font-size: 0.9375rem; }
+    .install-card a { font-weight: 500; }
+    .install-card.hidden { display: none; }
+    .store-request-hint {
+      margin: -0.5rem 0 1rem;
+      font-size: 0.9rem;
+      color: var(--text-tertiary);
+    }
+    .store-request-hint a { color: var(--accent); }
+    .faq-search-wrap { margin-bottom: 1rem; }
+    .faq-search {
+      width: 100%;
+      max-width: 100%;
+      padding: 0.65rem 1rem 0.65rem 2.5rem;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .faq-search::placeholder { color: var(--text-tertiary); }
+    .faq-search:focus {
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+    }
+    .faq-no-results { display: none; margin: 1rem 0; font-size: 0.9rem; color: var(--text-tertiary); }
+    .faq-no-results.visible { display: block; }
     .faq-list { margin: 0; padding: 0; list-style: none; }
     .section-intro {
       margin: -0.25rem 0 1.1rem;
@@ -128,24 +203,45 @@
       font-size: 0.95rem;
     }
     .faq-item {
-      margin-bottom: 1rem;
-      padding: 1rem 1.15rem;
-      background: rgba(255,255,255,0.03);
+      margin-bottom: 0.5rem;
       border: 1px solid var(--border);
       border-radius: var(--radius);
+      background: rgba(255,255,255,0.03);
+      overflow: hidden;
     }
-    .faq-item dt {
+    .faq-item summary {
+      padding: 1rem 1.15rem;
       font-weight: 600;
       font-size: 0.9375rem;
       color: var(--text);
-      margin: 0 0 0.35rem;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      transition: background 0.15s ease;
     }
-    .faq-item dd {
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: "+";
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+    .faq-item[open] summary::after { content: "−"; }
+    .faq-item summary:hover { background: rgba(255,255,255,0.04); }
+    .faq-item .faq-answer {
+      padding: 0 1.15rem 1rem 1.15rem;
       margin: 0;
       font-size: 0.95rem;
       color: var(--text-secondary);
       line-height: 1.7;
     }
+    .faq-item .faq-answer p { margin: 0 0 0.5rem; }
+    .faq-item .faq-answer p:last-child { margin-bottom: 0; }
+    .faq-item.hidden { display: none; }
     .contact-card {
       margin-top: 1rem;
       padding: 1.5rem 1.25rem;
@@ -153,6 +249,19 @@
       border: 1px solid rgba(139, 92, 246, 0.2);
       border-radius: var(--radius);
     }
+    .quick-checks {
+      margin: 0 0 1.25rem;
+      padding: 1.15rem 1.25rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .quick-checks h3 { font-size: 0.9rem; font-weight: 600; color: var(--text); margin: 0 0 0.5rem; }
+    .quick-checks p, .quick-checks ul { margin: 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+    .quick-checks ul { padding-left: 1.2rem; margin-top: 0.35rem; }
+    .still-stuck { margin-bottom: 0.75rem; font-size: 0.9375rem; color: var(--text-secondary); }
+    .product-link-tip { margin-top: 0.75rem; font-size: 0.875rem; color: var(--text-tertiary); }
+    .trust-line { margin-top: 0.5rem; font-size: 0.8125rem; color: var(--text-tertiary); }
     .contact-card p { margin-bottom: 0.5rem; }
     .support-email {
       display: inline-flex;
@@ -249,6 +358,7 @@
 
     /* Premium reading rhythm */
     .wrap > * { max-width: 72ch; }
+    .wrap > .main-surface { max-width: none; }
 
     /* Small-screen polish */
     @media (max-width: 420px) {
@@ -259,52 +369,86 @@
 </head>
 <body>
   <div class="wrap">
+    <div class="main-surface">
     <a href="/" class="back">← Back to ReStock Pro</a>
     <h1>Support</h1>
     <p class="lead">Need help with ReStock Pro? Most issues can be solved in seconds below.</p>
     <p class="cred">Built for collectors and drop-chasers who are tired of missing restocks.</p>
 
+    <div class="quick-troubleshoot">
+      <h3>Quick troubleshooting</h3>
+      <p>Most alert issues are caused by one of these:</p>
+      <ul>
+        <li>Notifications disabled in Chrome</li>
+        <li>ReStock Pro extension turned off</li>
+        <li>The store changed the product page</li>
+      </ul>
+      <p style="margin-top: 0.6rem;">If alerts still aren’t working, send us the product link and we’ll investigate.</p>
+    </div>
+
+    <!-- When the extension is on the Chrome Web Store: remove class "hidden" from #install-card and set the link href to your store URL -->
+    <div class="install-card hidden" id="install-card" aria-hidden="true">
+      <h3 style="margin: 0 0 0.35rem; font-size: 0.95rem;">Install ReStock Pro</h3>
+      <p>Download the official extension from the <a href="#" target="_blank" rel="noopener">Chrome Web Store</a>.</p>
+    </div>
+
     <h2>Frequently asked questions</h2>
     <p class="section-intro">Most support requests fall into one of the categories below.</p>
-    <dl class="faq-list">
-      <div class="faq-item">
-        <dt>What is ReStock Pro?</dt>
-        <dd>ReStock Pro is a Chrome extension that monitors product pages (e.g. at Target and other stores) and notifies you when items restock or become available for preorder, so you don’t have to keep checking manually.</dd>
-      </div>
-      <div class="faq-item">
-        <dt>How often does ReStock Pro check for restocks?</dt>
-        <dd>ReStock Pro checks selected product pages periodically in the background. The frequency may vary depending on store restrictions, rate limits, and system load.</dd>
-      </div>
-      <div class="faq-item">
-        <dt>Why am I not receiving notifications?</dt>
-        <dd>
-          Make sure notifications are enabled in Chrome and that the extension is allowed to show alerts. Also verify your browser is running and the extension is enabled.
-          <br><br>
-          If you’re still not seeing alerts, email us with the product link you’re tracking and what you expected vs what happened.
-        </dd>
-      </div>
-      <div class="faq-item">
-        <dt>How do I get early access?</dt>
-        <dd>Join the waitlist on our homepage with your email. We’ll send one email when the extension is available on the Chrome Web Store.</dd>
-      </div>
-      <div class="faq-item">
-        <dt>Alerts seem wrong or delayed—why?</dt>
-        <dd>We rely on how stores display their pages. If a site changes its layout or blocks automated checks, alerts can be delayed or incorrect. If alerts stop working for a specific store, it usually means the store updated their website. Send us the product link and we’ll investigate.</dd>
-      </div>
-      <div class="faq-item">
-        <dt>Which stores are supported?</dt>
-        <dd>We currently support Target and are working on more. If you have a store you’d like us to add, email us—we use that feedback to prioritize.</dd>
-      </div>
-      <div class="faq-item">
-        <dt>Can I request a store or feature?</dt>
-        <dd>Yes. Send us the store name and a product link (or a few examples). We prioritize additions based on user demand and feasibility.</dd>
-      </div>
-    </dl>
+    <p class="store-request-hint">Have a store you want supported? <a href="mailto:support@getrestock.app">Tell us</a> and we'll prioritize it.</p>
+    <div class="faq-search-wrap">
+      <input type="search" class="faq-search" id="faq-search" placeholder="Search support articles…" aria-label="Search support articles">
+    </div>
+    <p class="faq-no-results" id="faq-no-results">No articles match your search.</p>
+    <div class="faq-list" id="faq-list" role="list">
+      <details class="faq-item" data-faq>
+        <summary>What does ReStock Pro do?</summary>
+        <div class="faq-answer"><p>ReStock Pro is a Chrome extension that monitors product pages (e.g. at Target and other stores) and notifies you when items restock or become available for preorder, so you don’t have to keep checking manually.</p></div>
+      </details>
+      <details class="faq-item" data-faq>
+        <summary>How often does ReStock Pro check for restocks?</summary>
+        <div class="faq-answer"><p>ReStock Pro checks selected product pages periodically in the background. The frequency may vary depending on store restrictions, rate limits, and system load.</p></div>
+      </details>
+      <details class="faq-item" data-faq>
+        <summary>Why am I not getting restock alerts?</summary>
+        <div class="faq-answer"><p>Make sure notifications are enabled in Chrome and that the extension is allowed to show alerts. Also verify your browser is running and the extension is enabled.</p><p>If you’re still not seeing alerts, email us with the product link you’re tracking and what you expected vs what happened.</p></div>
+      </details>
+      <details class="faq-item" data-faq>
+        <summary>The extension icon disappeared — what happened?</summary>
+        <div class="faq-answer"><p>Open Chrome → Extensions → Manage Extensions. Find ReStock Pro and ensure it is enabled.</p></div>
+      </details>
+      <details class="faq-item" data-faq>
+        <summary>How do I get early access?</summary>
+        <div class="faq-answer"><p>Join the waitlist on our homepage with your email. We’ll send one email when the extension is available on the Chrome Web Store.</p></div>
+      </details>
+      <details class="faq-item" data-faq>
+        <summary>Alerts seem wrong or delayed—why?</summary>
+        <div class="faq-answer"><p>We rely on how stores display their pages. If a site changes its layout or blocks automated checks, alerts can be delayed or incorrect. If alerts stop working for a specific store, it usually means the retailer updated their website. Send us the product link and we’ll investigate.</p></div>
+      </details>
+      <details class="faq-item" data-faq>
+        <summary>Which stores are supported?</summary>
+        <div class="faq-answer"><p>We currently support Target and are working on more. If you have a store you’d like us to add, email us—we use that feedback to prioritize.</p></div>
+      </details>
+      <details class="faq-item" data-faq>
+        <summary>Can I request a store or feature?</summary>
+        <div class="faq-answer"><p>Yes. Send us the store name and a product link (or a few examples). We prioritize additions based on user demand and feasibility.</p></div>
+      </details>
+    </div>
 
     <h2>Contact us</h2>
     <p>Couldn’t find what you need? Email us and we’ll help.</p>
+    <div class="quick-checks">
+      <h3>Quick checks before contacting support</h3>
+      <ul>
+        <li>Make sure the ReStock Pro extension is enabled in Chrome</li>
+        <li>Ensure Chrome notifications are allowed</li>
+        <li>Confirm the product page you are tracking still exists</li>
+      </ul>
+      <p style="margin-top: 0.5rem;">If everything looks correct and alerts still aren't working, send us the product link and we'll investigate.</p>
+    </div>
+    <p class="still-stuck">Still stuck? Send us the product link and we'll look into it.</p>
     <div class="contact-card">
-      <a href="mailto:support@getrestock.app" class="support-email">support@getrestock.app</a>
+      <a href="mailto:support@getrestock.app" class="support-email" aria-label="Email ReStock Pro support">support@getrestock.app</a>
+      <p class="trust-line">We read every message.</p>
       <p class="response-time">We usually reply within <strong>1–3 business days</strong>.</p>
       <p style="margin-top: 1rem; margin-bottom: 0.35rem;"><strong style="color: var(--text);">When you write, please include:</strong></p>
       <ul class="tips">
@@ -312,8 +456,10 @@
         <li>Your browser and version (e.g. Chrome 120)</li>
         <li>For extension issues: the store and product page, and what you expected vs what happened</li>
       </ul>
+      <p class="product-link-tip">Include the product link when contacting support — it helps us fix issues faster.</p>
     </div>
 
+    </div>
     <p class="legal-note">For legal or privacy matters, use <a href="mailto:legal@getrestock.app">legal@getrestock.app</a>. See our <a href="/terms.html">Terms of Use</a> and <a href="/privacy.html">Privacy Policy</a>.</p>
 
     <div class="footer-meta">
@@ -323,5 +469,26 @@
       <a href="/" class="footer-logo" aria-label="ReStock Pro home"><img src="logospb.png" alt=""></a>
     </div>
   </div>
+  <script>
+    (function () {
+      var searchEl = document.getElementById('faq-search');
+      var listEl = document.getElementById('faq-list');
+      var noResultsEl = document.getElementById('faq-no-results');
+      if (!searchEl || !listEl) return;
+      var items = listEl.querySelectorAll('.faq-item');
+      searchEl.addEventListener('input', function () {
+        var q = (searchEl.value || '').trim().toLowerCase();
+        var visible = 0;
+        items.forEach(function (item) {
+          var summary = item.querySelector('summary');
+          var text = (summary ? summary.textContent : item.textContent).toLowerCase();
+          var match = !q || text.indexOf(q) !== -1;
+          item.classList.toggle('hidden', !match);
+          if (match) visible++;
+        });
+        if (noResultsEl) noResultsEl.classList.toggle('visible', q.length > 0 && visible === 0);
+      });
+    })();
+  </script>
 </body>
 </html>
