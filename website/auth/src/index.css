@@ -270,14 +270,28 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
 }
 
-/* Flatten inner content so no recessed box */
+/* Flatten inner content so no recessed box — inner div has cl-* so our broad rule gave it a dark background */
 .auth-layout__card [class*="cl-socialButtonsBlockButton"] button *,
 .auth-layout__card [class*="cl-socialButtons"] button *,
 [class*="cl-socialButtonsBlockButton"] button *,
 [class*="cl-socialButtons"] button * {
   background: transparent !important;
+  background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
+  border-radius: inherit !important;
+}
+
+/* Override the broad .auth-layout__card [class*="cl-"] for any Clerk inner wrapper inside social buttons */
+.auth-layout__card [class*="cl-socialButtonsBlockButton"] button [class*="cl-"],
+.auth-layout__card [class*="cl-socialButtonsBlockButton"] a [class*="cl-"],
+.auth-layout__card [class*="cl-socialButtons"] button [class*="cl-"],
+.auth-layout__card [class*="cl-socialButtons"] a [class*="cl-"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: inherit !important;
 }
 
 .auth-layout__card [class*="cl-socialButtonsBlockButton"] button:hover,
@@ -327,8 +341,10 @@ body {
 [class*="cl-socialButtonsBlockButton"] a *,
 [class*="cl-socialButtons"] a * {
   background: transparent !important;
+  background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
+  border-radius: inherit !important;
 }
 
 .auth-layout__card [class*="cl-socialButtonsBlockButton"] a:hover,
