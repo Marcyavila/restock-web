@@ -111,15 +111,76 @@ body {
   border-color: var(--auth-border) !important;
 }
 
-.auth-layout__card input,
-.auth-layout__card [class*="cl-"] input {
+/* Exclude OTP/code input — Clerk uses a transparent input over 6 digit cells; our styles would break it */
+.auth-layout__card input:not([data-input-otp="true"]),
+.auth-layout__card [class*="cl-"] input:not([data-input-otp="true"]) {
   background: var(--auth-surface-elevated) !important;
   color: var(--auth-text) !important;
-  border-color: var(--auth-border) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
-.auth-layout__card a {
+/* Verification code input and all text inputs: clearly visible border (exclude OTP) */
+.auth-layout__card input[type="text"]:not([data-input-otp="true"]),
+.auth-layout__card input[type="email"],
+.auth-layout__card input[inputmode="numeric"]:not([data-input-otp="true"]),
+.auth-layout__card [class*="cl-formFieldInput"] input:not([data-input-otp="true"]),
+.auth-layout__card [class*="cl-input"]:not([data-input-otp="true"]) {
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+/* OTP/code verification: preserve 6-digit layout and style the digit cells */
+.auth-layout__card [class*="cl-formFieldInput"]:has(input[data-input-otp="true"]),
+.auth-layout__card [class*="cl-input"]:has(input[data-input-otp="true"]) {
+  display: flex !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
+}
+
+.auth-layout__card [class*="cl-formFieldInput"]:has(input[data-input-otp="true"]) > div,
+.auth-layout__card [class*="cl-formFieldInput"]:has(input[data-input-otp="true"]) [class*="otp"] > div,
+.auth-layout__card [data-input-otp] > div {
+  min-width: 2.5rem !important;
+  height: 2.75rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 8px !important;
+  background: var(--auth-surface-elevated) !important;
+  color: var(--auth-text) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--auth-font) !important;
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+}
+
+.auth-layout__card a,
+.auth-layout__card [class*="cl-"] a {
   color: var(--auth-accent-hover) !important;
+  font-weight: 500 !important;
+}
+
+/* Identity/email preview (e.g. verification step) and edit button */
+.auth-layout__card [class*="cl-identityPreview"],
+.auth-layout__card [class*="cl-userPreview"] {
+  color: var(--auth-text) !important;
+}
+
+.auth-layout__card [class*="cl-identityPreview"] button,
+.auth-layout__card [class*="cl-userPreview"] button,
+.auth-layout__card [class*="edit"] button,
+.auth-layout__card button[aria-label*="edit"],
+.auth-layout__card button[aria-label*="change"] {
+  background: var(--auth-surface-elevated) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: var(--auth-text-secondary) !important;
+  border-radius: 8px !important;
+}
+
+.auth-layout__card [class*="cl-identityPreview"] button:hover,
+.auth-layout__card [class*="cl-userPreview"] button:hover {
+  color: var(--auth-text) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Hide Clerk's built-in header so only our AuthLayout title shows */
@@ -218,24 +279,24 @@ body {
   box-shadow: 0 0 0 2px var(--auth-surface), 0 0 0 4px var(--auth-accent) !important;
 }
 
-/* Inputs */
-.auth-layout__card [class*="cl-formFieldInput"] input,
-.auth-layout__card [class*="cl-input"],
-[class*="cl-formFieldInput"] input,
-[class*="cl-input"] {
+/* Inputs (email, password) — visible border; exclude OTP so Clerk's 6-digit UI works */
+.auth-layout__card [class*="cl-formFieldInput"] input:not([data-input-otp="true"]),
+.auth-layout__card [class*="cl-input"]:not([data-input-otp="true"]),
+[class*="cl-formFieldInput"] input:not([data-input-otp="true"]),
+[class*="cl-input"]:not([data-input-otp="true"]) {
   border-radius: 10px !important;
   background: var(--auth-surface-elevated) !important;
   color: var(--auth-text) !important;
-  border: 1px solid var(--auth-border) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
   padding: 12px 14px !important;
   min-height: 44px !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
-.auth-layout__card [class*="cl-formFieldInput"] input:focus,
-.auth-layout__card [class*="cl-input"]:focus,
-[class*="cl-formFieldInput"] input:focus,
-[class*="cl-input"]:focus {
+.auth-layout__card [class*="cl-formFieldInput"] input:not([data-input-otp="true"]):focus,
+.auth-layout__card [class*="cl-input"]:not([data-input-otp="true"]):focus,
+[class*="cl-formFieldInput"] input:not([data-input-otp="true"]):focus,
+[class*="cl-input"]:not([data-input-otp="true"]):focus {
   outline: none !important;
   border-color: var(--auth-accent) !important;
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25) !important;
