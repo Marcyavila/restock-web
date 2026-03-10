@@ -11,11 +11,13 @@
   <style>
     :root {
       --bg: #07080c;
+      --surface: #0d0f14;
       --text: #f8f9fc;
       --text-secondary: rgba(248, 249, 252, 0.72);
       --text-tertiary: rgba(248, 249, 252, 0.55);
       --accent: #8b5cf6;
       --accent-hover: #9d6ffa;
+      --border: rgba(255,255,255,0.06);
     }
     * { box-sizing: border-box; }
     body {
@@ -23,28 +25,91 @@
       min-height: 100%;
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 16px;
+      font-weight: 400;
       color: var(--text);
       background: var(--bg);
-      line-height: 1.6;
+      line-height: 1.65;
       -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
-    h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.5rem; }
-    .updated { font-size: 0.875rem; color: var(--text-tertiary); margin-bottom: 2rem; }
+    /* Single, non-repeating backdrop layer (avoids tiling artifacts on long pages) */
+    body { position: relative; isolation: isolate; }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(1200px 700px at 50% -140px, rgba(139,92,246,0.12), transparent 60%),
+        radial-gradient(900px 600px at 10% 20%, rgba(59,130,246,0.08), transparent 55%);
+      background-repeat: no-repeat;
+    }
+
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: clamp(1.5rem, 4vw, 2.5rem) 1.25rem 4.25rem;
+    }
+    h1 {
+      font-size: clamp(1.65rem, 2.2vw, 2.05rem);
+      font-weight: 700;
+      margin: 0 0 0.55rem;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .updated {
+      font-size: 0.9rem;
+      color: var(--text-tertiary);
+      margin-bottom: 2.15rem;
+      line-height: 1.5;
+    }
     a { color: var(--accent); text-decoration: none; }
     a:hover { color: var(--accent-hover); text-decoration: underline; }
-    h2 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 0.75rem; }
+    h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 2.35rem 0 0.8rem;
+      color: var(--text);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.2;
+      position: relative;
+      padding-top: 1.15rem;
+    }
+    h2::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 20%, rgba(139,92,246,0.14) 50%, rgba(255,255,255,0.08) 80%, transparent 100%);
+      opacity: 0.9;
+    }
     p, li { color: var(--text-secondary); margin: 0 0 0.75rem; }
     ul { padding-left: 1.25rem; }
     .back { display: inline-block; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 500; }
     strong { color: var(--text); font-weight: 600; }
+
+    /* Premium reading rhythm */
+    .wrap > * { max-width: 72ch; }
+    p { font-size: 1rem; line-height: 1.75; }
+    li { line-height: 1.75; }
+    ul { margin: 0.25rem 0 0.9rem; }
+
+    /* Small-screen polish */
+    @media (max-width: 420px) {
+      .wrap { padding-left: 1rem; padding-right: 1rem; }
+      h2 { margin-top: 2.1rem; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <a href="/" class="back">← Back to ReStock Pro</a>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: March 2026</p>
+    <p class="updated">Last updated: March 10, 2026</p>
     <p>This Privacy Policy describes how ReStock Pro and getrestock.app (“<strong>we</strong>,” “<strong>us</strong>”) collect, use, and protect information when you use our website, waitlist, or browser extension (the “<strong>Service</strong>”). By using the Service, you agree to this policy and our <a href="/terms.html">Terms of Use</a>.</p>
     <h2>Information We Collect</h2>
     <p><strong>Waitlist signup:</strong> When you join our waitlist, we collect your email address. We may also collect technical data associated with your signup, such as IP address, approximate location (e.g., city/country derived from IP), and referrer (the site or link you came from). This helps us prevent abuse and understand how people find us.</p>
