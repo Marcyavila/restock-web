@@ -33,11 +33,14 @@ function ExtensionCallback() {
   );
 }
 
+// Force redirect to /auth/connect after sign-in so we can pass token to extension (full URL so Clerk respects it)
+const connectUrl = typeof window !== "undefined" ? `${window.location.origin}/auth/connect` : "/auth/connect";
+
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<SignIn afterSignInUrl="/auth/connect" signUpUrl="/auth/sign-up" />} />
-      <Route path="/sign-up" element={<SignIn afterSignUpUrl="/auth/connect" signInUrl="/auth" />} />
+      <Route path="/" element={<SignIn forceRedirectUrl={connectUrl} signUpUrl="/auth/sign-up" />} />
+      <Route path="/sign-up" element={<SignIn signUpForceRedirectUrl={connectUrl} signInUrl="/auth" />} />
       <Route path="/connect" element={<ConnectExtension />} />
       <Route path="/extension-callback" element={<ExtensionCallback />} />
       <Route path="/extension-callback/success" element={<ExtensionCallback />} />
