@@ -582,12 +582,21 @@ function setBgStyle(value) {
   initBgLayers();
 
   const mainWrapper = document.getElementById("mainWrapper");
-  const { authToken } = await chrome.storage.local.get(["authToken"]);
   function setLoggedIn(hasToken) {
     if (!mainWrapper) return;
     if (hasToken) mainWrapper.classList.add("logged-in");
     else mainWrapper.classList.remove("logged-in");
   }
+  // Listen for token changes immediately (e.g. from callback tab/iframe) so we never miss an update
+  chrome.storage.onChanged.addListener(function authTokenListener(changes, areaName) {
+    if (areaName === "local" && changes.authToken) {
+      const hasToken = !!changes.authToken.newValue;
+      setLoggedIn(hasToken);
+      if (hasToken) fetchUserPlan().then(updateAccountUI);
+    }
+  });
+
+  const { authToken } = await chrome.storage.local.get(["authToken"]);
   setLoggedIn(!!authToken);
 
   function initLoginGate() {
@@ -736,16 +745,6 @@ function setBgStyle(value) {
   });
 
   fetchUserPlan().then(updateAccountUI);
-
-  chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName === "local" && changes.authToken) {
-      const hasToken = !!changes.authToken.newValue;
-      setLoggedIn(hasToken);
-      if (hasToken) {
-        fetchUserPlan().then(updateAccountUI);
-      }
-    }
-  });
 
   const openWindowBtn = document.getElementById("window-button");
   if (openWindowBtn) {

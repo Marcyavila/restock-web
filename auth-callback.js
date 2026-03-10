@@ -4,11 +4,12 @@
  * we read the token, send it to the extension background, and navigate to success.
  */
 (function () {
-  const path = window.location.pathname;
+  const path = window.location.pathname || "";
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
   if (!token) return;
-  if (!/\/extension-callback\/?$/i.test(path)) return;
+  // Match /auth/extension-callback or /auth/connect/extension-callback (with optional trailing slash)
+  if (!/\/extension-callback\/?$/i.test(path) && !path.includes("extension-callback")) return;
 
   chrome.runtime.sendMessage({ type: "AUTH_CALLBACK", token }, function () {
     var u = new URL(window.location.href);
