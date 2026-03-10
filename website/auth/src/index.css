@@ -152,7 +152,7 @@ body {
   box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.03) !important;
 }
 
-/* Primary button (Continue) */
+/* Primary button (Continue) — flat style, no inner box */
 .auth-layout__card [class*="cl-formButtonPrimary"],
 [class*="cl-formButtonPrimary"] {
   border-radius: 10px !important;
@@ -165,6 +165,18 @@ body {
   min-height: 44px !important;
   cursor: pointer !important;
   transition: background-color 0.2s ease, transform 0.05s ease, box-shadow 0.2s ease !important;
+}
+
+/* Remove inner wrapper background so button is one flat purple surface */
+.auth-layout__card [class*="cl-formButtonPrimary"] > *,
+[class*="cl-formButtonPrimary"] > *,
+.auth-layout__card [class*="cl-formButtonPrimary"] span,
+[class*="cl-formButtonPrimary"] span,
+.auth-layout__card [class*="cl-formButtonPrimary"] svg,
+[class*="cl-formButtonPrimary"] svg {
+  background: transparent !important;
+  color: inherit !important;
+  fill: currentColor !important;
 }
 
 .auth-layout__card [class*="cl-formButtonPrimary"]:hover,
