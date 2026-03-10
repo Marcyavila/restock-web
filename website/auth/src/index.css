@@ -251,31 +251,43 @@ body {
   box-shadow: 0 0 0 2px var(--auth-surface), 0 0 0 4px var(--auth-accent) !important;
 }
 
-/* Social buttons (Discord, Google) — clearly look like buttons with visible border */
+/* Social buttons (Discord, Google) — one flat surface, clear border, no inner recess */
 .auth-layout__card [class*="cl-socialButtonsBlockButton"] button,
 .auth-layout__card [class*="cl-socialButtons"] button,
 [class*="cl-socialButtonsBlockButton"] button,
 [class*="cl-socialButtons"] button {
-  border-radius: 10px !important;
+  border-radius: 12px !important;
   font-weight: 600 !important;
   font-family: var(--auth-font) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
+  font-size: 0.9375rem !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   color: var(--auth-text) !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
-  padding: 12px 20px !important;
-  min-height: 44px !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  padding: 14px 22px !important;
+  min-height: 48px !important;
   cursor: pointer !important;
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.05s ease !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Flatten inner content so no recessed box */
+.auth-layout__card [class*="cl-socialButtonsBlockButton"] button *,
+.auth-layout__card [class*="cl-socialButtons"] button *,
+[class*="cl-socialButtonsBlockButton"] button *,
+[class*="cl-socialButtons"] button * {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .auth-layout__card [class*="cl-socialButtonsBlockButton"] button:hover,
 .auth-layout__card [class*="cl-socialButtons"] button:hover,
 [class*="cl-socialButtonsBlockButton"] button:hover,
 [class*="cl-socialButtons"] button:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.35) !important;
-  transform: translateY(-0.5px);
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .auth-layout__card [class*="cl-socialButtonsBlockButton"] button:focus-visible,
@@ -295,27 +307,38 @@ body {
   align-items: center !important;
   justify-content: center !important;
   gap: 10px !important;
-  border-radius: 10px !important;
+  border-radius: 12px !important;
   font-weight: 600 !important;
+  font-size: 0.9375rem !important;
   font-family: var(--auth-font) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   color: var(--auth-text) !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
-  padding: 12px 20px !important;
-  min-height: 44px !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  padding: 14px 22px !important;
+  min-height: 48px !important;
   cursor: pointer !important;
   text-decoration: none !important;
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.05s ease !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+
+.auth-layout__card [class*="cl-socialButtonsBlockButton"] a *,
+.auth-layout__card [class*="cl-socialButtons"] a *,
+[class*="cl-socialButtonsBlockButton"] a *,
+[class*="cl-socialButtons"] a * {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .auth-layout__card [class*="cl-socialButtonsBlockButton"] a:hover,
 .auth-layout__card [class*="cl-socialButtons"] a:hover,
 [class*="cl-socialButtonsBlockButton"] a:hover,
 [class*="cl-socialButtons"] a:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.35) !important;
-  transform: translateY(-0.5px);
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
   color: var(--auth-text) !important;
 }
 
