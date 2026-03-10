@@ -98,7 +98,7 @@
     li { line-height: 1.75; }
     ul { margin: 0.25rem 0 0.9rem; }
 
-    /* Subtle section separators */
+   /* Subtle section separators */
     h2 { position: relative; padding-top: 1.15rem; }
     h2::before {
       content: "";
@@ -109,6 +109,42 @@
       height: 1px;
       background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 20%, rgba(139,92,246,0.14) 50%, rgba(255,255,255,0.08) 80%, transparent 100%);
       opacity: 0.9;
+    }
+
+    .footer-meta {
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      font-size: 0.875rem;
+      color: var(--text-tertiary);
+    }
+    .footer-meta::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 20%, rgba(139,92,246,0.14) 50%, rgba(255,255,255,0.08) 80%, transparent 100%);
+      opacity: 0.9;
+    }
+    .footer-meta p { margin: 0; }
+    .footer-meta a.footer-logo {
+      display: flex;
+      align-items: center;
+      opacity: 0.65;
+      transition: opacity 0.2s ease;
+    }
+    .footer-meta a.footer-logo:hover { opacity: 1; }
+    .footer-meta a.footer-logo img {
+      height: 20px;
+      width: auto;
+      display: block;
+      vertical-align: middle;
     }
 
     /* Small-screen polish */
@@ -214,7 +250,10 @@
     <p><strong>Binding arbitration:</strong> Except for disputes that qualify for small claims court or claims for injunctive or equitable relief related to intellectual property or misuse of the Service, any dispute, claim, or controversy arising out of or relating to these Terms or the Service will be resolved by binding arbitration administered by the American Arbitration Association (“<strong>AAA</strong>”) under its Consumer Arbitration Rules. The arbitration will be conducted in English. Judgment on the arbitration award may be entered in any court having jurisdiction.</p>
     <p><strong>Class action waiver:</strong> You and we agree that any dispute resolution will occur on an individual basis only and not in a class, consolidated, or representative action. To the fullest extent permitted by law, you waive any right to participate in a class action lawsuit or class arbitration against us.</p>
 
-    <p style="margin-top: 2.5rem; font-size: 0.875rem; color: var(--text-tertiary);">© 2026 ReStock Pro. All rights reserved.</p>
+    <div class="footer-meta">
+      <p>© 2026 ReStock Pro. All rights reserved.</p>
+      <a href="/" class="footer-logo" aria-label="ReStock Pro home"><img src="logospb.png" alt=""></a>
+    </div>
   </div>
 </body>
 </html>
