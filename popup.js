@@ -15,6 +15,9 @@ let _parallaxBgEl = null;
 let _lastDeferSchedule = 0;
 const _DEFER_SCHEDULE_THROTTLE_MS = 120;
 
+/** Production Convex HTTP URL — users never see or set this. Replace with your deployment from Convex Dashboard → Settings → URL. */
+const CONVEX_HTTP_URL = "https://vibrant-gopher-82.convex.site";
+
 /** Language: default English; Spanish optional in settings. */
 const TRANSLATIONS = {
   en: {
@@ -104,6 +107,11 @@ const TRANSLATIONS = {
     nextScanInS: "Next scan in {n}s",
     account: "Account",
     accountDesc: "Log in to sync your plan and unlock Pro.",
+    loginGateTitle: "Log in to use ReStock Pro",
+    loginGateSub: "Sign in or create an account",
+    continueWithGoogle: "Continue with Google",
+    continueWithDiscord: "Continue with Discord",
+    signInWithEmail: "Sign in with email",
     login: "Log in",
     logOut: "Log out",
     planFree: "Free",
@@ -197,6 +205,11 @@ const TRANSLATIONS = {
     nextScanInS: "Próximo escaneo en {n}s",
     account: "Cuenta",
     accountDesc: "Inicia sesión para sincronizar tu plan y desbloquear Pro.",
+    loginGateTitle: "Inicia sesión para usar ReStock Pro",
+    loginGateSub: "Inicia sesión o crea una cuenta",
+    continueWithGoogle: "Continuar con Google",
+    continueWithDiscord: "Continuar con Discord",
+    signInWithEmail: "Iniciar sesión con correo",
     login: "Iniciar sesión",
     logOut: "Cerrar sesión",
     planFree: "Gratis",
@@ -205,16 +218,20 @@ const TRANSLATIONS = {
   }
 };
 
-/** Convex: set in storage key 'convexSiteUrl' (e.g. https://xxx.convex.site) or leave empty to skip plan fetch. */
 let userPlan = null;
 
 async function fetchUserPlan() {
-  const { authToken, convexSiteUrl } = await chrome.storage.local.get(["authToken", "convexSiteUrl"]);
-  if (!authToken || !convexSiteUrl) {
+  const { authToken } = await chrome.storage.local.get(["authToken"]);
+  if (!authToken) {
     userPlan = null;
     return null;
   }
-  const url = convexSiteUrl.replace(/\/$/, "") + "/getPlan";
+  const base = (typeof CONVEX_HTTP_URL !== "undefined" ? CONVEX_HTTP_URL : "").replace(/\/$/, "");
+  if (!base) {
+    userPlan = null;
+    return null;
+  }
+  const url = base + "/getPlan";
   try {
     const res = await fetch(url, { headers: { Authorization: `Bearer ${authToken}` } });
     if (!res.ok) {
@@ -564,6 +581,34 @@ function setBgStyle(value) {
   currentLocale = storedLocale === "es" ? "es" : "en";
   initBgLayers();
 
+  const mainWrapper = document.getElementById("mainWrapper");
+  const { authToken } = await chrome.storage.local.get(["authToken"]);
+  function setLoggedIn(hasToken) {
+    if (!mainWrapper) return;
+    if (hasToken) mainWrapper.classList.add("logged-in");
+    else mainWrapper.classList.remove("logged-in");
+  }
+  setLoggedIn(!!authToken);
+
+  const AUTH_URL = "https://getrestock.app/auth?from_extension=1";
+  function initLoginGate() {
+    const gateTitle = document.querySelector(".login-gate-text");
+    const gateSub = document.querySelector(".login-gate-sub");
+    const btnGoogle = document.getElementById("loginGateGoogle");
+    const btnDiscord = document.getElementById("loginGateDiscord");
+    const btnEmail = document.getElementById("loginGateEmail");
+    if (gateTitle) gateTitle.textContent = t("loginGateTitle");
+    if (gateSub) gateSub.textContent = t("loginGateSub");
+    [btnGoogle, btnDiscord, btnEmail].forEach((btn) => {
+      if (!btn) return;
+      if (btn === btnGoogle) btn.textContent = t("continueWithGoogle");
+      else if (btn === btnDiscord) btn.textContent = t("continueWithDiscord");
+      else if (btn === btnEmail) btn.textContent = t("signInWithEmail");
+      btn.addEventListener("click", () => { chrome.tabs.create({ url: AUTH_URL }); });
+    });
+  }
+  if (!authToken) initLoginGate();
+
   if (document.body.classList.contains("standalone-mode")) {
     const mainWrapper = document.getElementById("mainWrapper");
     const topBar = document.querySelector(".top-bar");
@@ -635,8 +680,10 @@ function setBgStyle(value) {
       bottomBar.classList.add("dashboard-action-zone");
       /* countdown progress bar is already in popup.html inside #monitorContainer */
       const bgLayers = mainWrapper.querySelector(".bg-layers");
+      const loginGate = document.getElementById("loginGate");
       while (mainWrapper.firstChild) mainWrapper.removeChild(mainWrapper.firstChild);
       if (bgLayers) mainWrapper.appendChild(bgLayers);
+      if (loginGate) mainWrapper.appendChild(loginGate);
       mainWrapper.appendChild(dashboardWrapper);
       if (settingsOverlay) mainWrapper.appendChild(settingsOverlay);
     }
@@ -683,25 +730,28 @@ function setBgStyle(value) {
   });
   const loginBtn = document.getElementById("loginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
-  const convexSiteUrlInput = document.getElementById("convexSiteUrl");
-  if (convexSiteUrlInput) {
-    chrome.storage.local.get(["convexSiteUrl"], (d) => {
-      convexSiteUrlInput.value = d.convexSiteUrl || "";
-    });
-    convexSiteUrlInput.addEventListener("blur", () => {
-      const v = (convexSiteUrlInput.value || "").trim().replace(/\/+$/, "");
-      chrome.storage.local.set({ convexSiteUrl: v || undefined });
-      if (v) fetchUserPlan().then(updateAccountUI);
-    });
-  }
-  if (loginBtn) loginBtn.addEventListener("click", () => { chrome.tabs.create({ url: "https://getrestock.app/auth" }); });
+  if (loginBtn) loginBtn.addEventListener("click", () => { chrome.tabs.create({ url: AUTH_URL }); });
   if (logoutBtn) logoutBtn.addEventListener("click", async () => {
+    chrome.runtime.sendMessage({ action: "stop" });
+    await chrome.storage.local.set({ isRunning: false });
     await chrome.storage.local.remove("authToken");
     userPlan = null;
+    setLoggedIn(false);
     updateAccountUI();
+    chrome.tabs.create({ url: "https://getrestock.app/auth/logout" });
   });
 
   fetchUserPlan().then(updateAccountUI);
+
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === "local" && changes.authToken) {
+      const hasToken = !!changes.authToken.newValue;
+      setLoggedIn(hasToken);
+      if (hasToken) {
+        fetchUserPlan().then(updateAccountUI);
+      }
+    }
+  });
 
   const openWindowBtn = document.getElementById("window-button");
   if (openWindowBtn) {

@@ -15,18 +15,39 @@ const getPlan = httpAction(async (ctx, request) => {
   if (request.method === "OPTIONS") {
     return new Response(null, { headers: CORS_HEADERS });
   }
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
+  try {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...CORS_HEADERS } }
+      );
+    }
+    const plan = await ctx.runQuery(api.profiles.getMyPlan, {});
+    if (!plan) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...CORS_HEADERS } }
+      );
+    }
+    return new Response(JSON.stringify(plan), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const isAuthError =
+      message.includes("JWT") ||
+      message.includes("token") ||
+      message.includes("issuer") ||
+      message.includes("Unauthorized") ||
+      message.includes("authentication");
+    const status = isAuthError ? 401 : 500;
     return new Response(
-      JSON.stringify({ error: "Unauthorized" }),
-      { status: 401, headers: { "Content-Type": "application/json", ...CORS_HEADERS } }
+      JSON.stringify({ error: isAuthError ? "Unauthorized" : "Internal error" }),
+      { status, headers: { "Content-Type": "application/json", ...CORS_HEADERS } }
     );
   }
-  const plan = await ctx.runQuery(api.profiles.getMyPlan, {});
-  return new Response(JSON.stringify(plan), {
-    status: 200,
-    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-  });
 });
 
 /** POST /stripe-webhook — Stripe sends subscription events here. Verify signature and call setPlanFromStripe. */

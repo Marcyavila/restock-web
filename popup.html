@@ -2397,6 +2397,117 @@
       80% { transform: translateX(2px); }
     }
 
+    /* Login gate: full-screen overlay when user is not logged in (last child so it paints on top) */
+    .login-gate {
+      position: absolute;
+      inset: 0;
+      z-index: 9999;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      padding: var(--space-6);
+      box-sizing: border-box;
+      pointer-events: auto;
+    }
+    /* Only hide the gate when user is logged in */
+    .main-wrapper.logged-in .login-gate { display: none !important; pointer-events: none; }
+    .main-wrapper:not(.logged-in) #appContent { display: none !important; }
+    .main-wrapper:not(.logged-in) .dashboard-wrapper { display: none !important; }
+    .main-wrapper:not(.logged-in) #settingsOverlay { display: none !important; }
+    #appContent {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .login-gate-inner {
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+    }
+    .login-gate-logo {
+      width: auto;
+      height: 48px;
+      margin-bottom: var(--space-6);
+      object-fit: contain;
+    }
+    .login-gate-text {
+      font-size: var(--type-panel-title);
+      font-weight: var(--font-weight-bold);
+      color: var(--text);
+      margin: 0 0 var(--space-1);
+      line-height: 1.35;
+    }
+    .login-gate-sub {
+      font-size: var(--type-metadata);
+      color: var(--text-tertiary);
+      margin: 0 0 var(--space-4);
+      line-height: 1.35;
+    }
+    .login-gate .field {
+      text-align: left;
+      margin-bottom: var(--space-4);
+    }
+    .login-gate .field input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .login-gate-btn {
+      width: 100%;
+      padding: var(--space-4) var(--space-6);
+      font-size: var(--type-product-name);
+      font-weight: var(--font-weight-bold);
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.2s var(--ease), transform 0.1s var(--ease-out);
+    }
+    .login-gate-btn:hover {
+      background: var(--accent-hover);
+      transform: scale(1.02);
+    }
+    .login-gate-options {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      width: 100%;
+    }
+    .login-gate-btn-option {
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--type-body);
+      font-weight: var(--font-weight-semibold);
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.1s var(--ease-out);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+    }
+    .login-gate-btn-option:hover {
+      background: var(--surface-elevated);
+      border-color: var(--border-strong);
+      transform: scale(1.01);
+    }
+    .login-gate-btn-option.login-gate-btn-email {
+      margin-top: var(--space-2);
+      background: var(--accent);
+      border-color: transparent;
+      color: #fff;
+    }
+    .login-gate-btn-option.login-gate-btn-email:hover {
+      background: var(--accent-hover);
+    }
+
     .product-item.loading { cursor: default; pointer-events: none; }
     .product-item.loading .remove-btn { pointer-events: auto; opacity: 0.6; }
     .skeleton-img {
@@ -2433,6 +2544,7 @@
       <div class="bg-layer bg-layer--peek" id="bgPeek"></div>
     </div>
 
+    <div id="appContent">
     <header class="top-bar">
       <div class="header">
         <div class="header-left">
@@ -2495,10 +2607,6 @@
           <p class="settings-overlay-section-desc" data-i18n="accountDesc">Log in to sync your plan and unlock Pro.</p>
           <div class="settings-overlay-card" id="accountCard">
             <p id="accountStatus" class="account-status" style="margin: 0 0 0.5rem; font-size: var(--type-body); color: var(--text-tertiary);">—</p>
-            <div class="field" style="margin-bottom: 0.75rem;">
-              <label for="convexSiteUrl" style="font-size: var(--type-caption); color: var(--text-tertiary);">Backend URL (e.g. https://xxx.convex.site)</label>
-              <input type="url" id="convexSiteUrl" placeholder="https://xxx.convex.site" style="margin-top: 4px; width: 100%; box-sizing: border-box;" />
-            </div>
             <div class="account-actions">
               <button type="button" id="loginBtn" class="lang-btn" style="min-width: 100%;" data-i18n="login">Log in</button>
               <button type="button" id="logoutBtn" class="lang-btn" style="min-width: 100%; display: none;" data-i18n="logOut">Log out</button>
@@ -2547,6 +2655,20 @@
       </div>
       <div class="settings-overlay-footer">
         <a href="https://www.venmo.com/u/MarcyAvila" target="_blank" rel="noopener"><span data-i18n="developedBy"></span><span data-i18n="venmo"></span></a>
+      </div>
+    </div>
+    </div>
+
+    <div class="login-gate" id="loginGate">
+      <div class="login-gate-inner">
+        <img src="RS%20full%20logo.png" alt="ReStock Pro" class="login-gate-logo" draggable="false">
+        <p class="login-gate-text" data-i18n="loginGateTitle">Log in to use ReStock Pro</p>
+        <p class="login-gate-sub" data-i18n="loginGateSub">Sign in or create an account</p>
+        <div class="login-gate-options">
+          <button type="button" id="loginGateGoogle" class="login-gate-btn-option" data-i18n="continueWithGoogle">Continue with Google</button>
+          <button type="button" id="loginGateDiscord" class="login-gate-btn-option" data-i18n="continueWithDiscord">Continue with Discord</button>
+          <button type="button" id="loginGateEmail" class="login-gate-btn-option login-gate-btn-email" data-i18n="signInWithEmail">Sign in with email</button>
+        </div>
       </div>
     </div>
   </div>

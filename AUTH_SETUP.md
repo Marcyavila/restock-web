@@ -35,6 +35,10 @@ This guide gets you from zero to login + free/Pro limits in the extension and on
    - `https://getrestock.app/auth/callback` (or your auth callback URL)
    - For local dev: `http://localhost:5173/auth/callback` (if you run the auth app locally)
 
+6. **Force Google/Discord to show account picker** so users always choose an account (no silent sign-in):
+   - Clerk Dashboard → **User & Authentication** → **Social connections** → **Google**. Look for **Authorization parameters**, **Custom parameters**, or **Always show account selector**. Add `prompt=select_account` (e.g. in "Additional authorization parameters") so Google shows "Choose an account" every time.
+   - For **Discord**, if a similar option exists, enable it so users can pick which Discord account to use.
+
 ---
 
 ## 3. Auth app (login + “Connect extension”)
