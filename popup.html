@@ -2406,6 +2406,7 @@
       align-items: center;
       justify-content: center;
       background: var(--bg);
+      background-image: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(124, 58, 237, 0.08) 0%, transparent 50%);
       padding: var(--space-6);
       box-sizing: border-box;
       pointer-events: auto;
@@ -2435,8 +2436,9 @@
       width: 100%;
       min-height: 0;
       border: none;
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius);
       background: var(--surface);
+      box-shadow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(0, 0, 0, 0.35);
     }
     .login-gate-logo {
       width: auto;

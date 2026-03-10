@@ -2,6 +2,23 @@ import React, { useEffect } from "react";
 import { SignIn, useAuth, useClerk } from "@clerk/clerk-react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
+const logoUrl =
+  typeof window !== "undefined" ? `${window.location.origin}/logospb.png` : "/logospb.png";
+
+/** Full-page premium layout: gradient background, branding, centered card. */
+function AuthLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="auth-page">
+      <div className="auth-layout__brand">
+        <img src={logoUrl} alt="" className="auth-layout__logo" />
+        <h1 className="auth-layout__title">ReStock Pro</h1>
+        <p className="auth-layout__tagline">Sign in to sync your account</p>
+      </div>
+      <div className="auth-layout__card">{children}</div>
+    </div>
+  );
+}
+
 /** When user arrives from the extension with ?from_extension=1, sign out first so they always see the sign-in form and can choose Google/Discord/email (and which account). */
 function ForceSignInIfFromExtension({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth();
@@ -27,8 +44,8 @@ function ForceSignInIfFromExtension({ children }: { children: React.ReactNode })
 
   if (signingOut || (isLoaded && isSignedIn && new URLSearchParams(location.search).get("from_extension") === "1")) {
     return (
-      <div style={{ padding: 24, color: "#8e8e98", textAlign: "center" }}>
-        Signing out so you can choose how to sign in…
+      <div className="auth-page">
+        <p className="auth-state-message">Signing out so you can choose how to sign in…</p>
       </div>
     );
   }
@@ -50,11 +67,11 @@ function ConnectExtension() {
     });
   }, [isLoaded, isSignedIn, getToken]);
 
-  if (!isLoaded) return <div style={{ padding: 24, color: "#8e8e98" }}>Loading…</div>;
+  if (!isLoaded) return <div className="auth-page"><p className="auth-state-message">Loading…</p></div>;
   if (!isSignedIn) return <Navigate to="/" replace />;
   return (
-    <div style={{ padding: 24, color: "#8e8e98", textAlign: "center" }}>
-      Redirecting to extension…
+    <div className="auth-page">
+      <p className="auth-state-message">Redirecting to extension…</p>
     </div>
   );
 }
@@ -74,8 +91,10 @@ function ExtensionCallback() {
   }, [location.search]);
 
   return (
-    <div style={{ padding: 48, textAlign: "center", color: "#fafafa", fontFamily: "system-ui" }}>
-      <p>{window.self !== window.top ? "Signed in! The extension will update." : "You can close this tab and return to the ReStock Pro extension."}</p>
+    <div className="auth-page">
+      <p className="auth-state-message auth-state-message--success">
+        {window.self !== window.top ? "Signed in! The extension will update." : "You can close this tab and return to the ReStock Pro extension."}
+      </p>
     </div>
   );
 }
@@ -95,16 +114,16 @@ function LogoutPage() {
 
   if (done) return null;
   return (
-    <div style={{ padding: 48, textAlign: "center", color: "#8e8e98", fontFamily: "system-ui" }}>
-      <p>Signing out…</p>
+    <div className="auth-page">
+      <p className="auth-state-message">Signing out…</p>
     </div>
   );
 }
 
 function LogoutDone() {
   return (
-    <div style={{ padding: 48, textAlign: "center", color: "#fafafa", fontFamily: "system-ui" }}>
-      <p>You’re signed out. You can close this tab.</p>
+    <div className="auth-page">
+      <p className="auth-state-message auth-state-message--success">You’re signed out. You can close this tab.</p>
     </div>
   );
 }
@@ -117,9 +136,9 @@ function IframeBanner() {
   if (typeof window === "undefined" || window.self === window.top) return null;
   const authUrl = `${window.location.origin}/auth?from_extension=1`;
   return (
-    <div style={{ padding: "8px 16px", background: "rgba(124, 58, 237, 0.15)", color: "#c4b5fd", fontSize: 13, textAlign: "center" }}>
-      Using Google or Discord?{" "}
-      <a href={authUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#a78bfa", fontWeight: 600 }}>
+    <div className="auth-iframe-banner">
+      <span className="auth-iframe-banner__text">Using Google or Discord?</span>{" "}
+      <a href={authUrl} target="_blank" rel="noopener noreferrer" className="auth-iframe-banner__link">
         Open in new tab
       </a>
     </div>
@@ -131,8 +150,22 @@ export default function App() {
     <ForceSignInIfFromExtension>
       <IframeBanner />
       <Routes>
-        <Route path="/" element={<SignIn forceRedirectUrl={connectUrl} signUpUrl="/auth/sign-up" />} />
-        <Route path="/sign-up" element={<SignIn signUpForceRedirectUrl={connectUrl} signInUrl="/auth" />} />
+        <Route
+          path="/"
+          element={
+            <AuthLayout>
+              <SignIn forceRedirectUrl={connectUrl} signUpUrl="/auth/sign-up" />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/sign-up"
+          element={
+            <AuthLayout>
+              <SignIn signUpForceRedirectUrl={connectUrl} signInUrl="/auth" />
+            </AuthLayout>
+          }
+        />
         <Route path="/connect" element={<ConnectExtension />} />
         <Route path="/logout" element={<LogoutPage />} />
         <Route path="/logout/done" element={<LogoutDone />} />

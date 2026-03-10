@@ -1,0 +1,174 @@
+/* ReStock Pro Auth — premium dark theme */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --auth-bg: #0a0a0c;
+  --auth-bg-mid: #0c0c0e;
+  --auth-surface: #151518;
+  --auth-surface-elevated: #1a1a1f;
+  --auth-border: rgba(255, 255, 255, 0.06);
+  --auth-text: #fafafa;
+  --auth-text-secondary: #8e8e98;
+  --auth-text-muted: #5c5c66;
+  --auth-accent: #7c3aed;
+  --auth-accent-hover: #8b5cf6;
+  --auth-accent-muted: rgba(124, 58, 237, 0.2);
+  --auth-radius: 14px;
+  --auth-radius-sm: 10px;
+  --auth-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--auth-font);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--auth-text);
+  background: var(--auth-bg);
+  /* Premium gradient: deep dark with subtle purple undertone */
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 50% at 100% 50%, rgba(124, 58, 237, 0.06) 0%, transparent 45%),
+    radial-gradient(ellipse 80% 50% at 0% 50%, rgba(124, 58, 237, 0.04) 0%, transparent 45%);
+}
+
+/* Optional: very subtle noise overlay for depth (enable if desired) */
+.auth-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-layout__brand {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.auth-layout__logo {
+  height: 32px;
+  width: auto;
+  display: inline-block;
+  margin-bottom: 8px;
+  opacity: 0.98;
+}
+
+.auth-layout__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--auth-text);
+  margin: 0 0 4px 0;
+}
+
+.auth-layout__tagline {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--auth-text-secondary);
+  margin: 0;
+}
+
+.auth-layout__card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-state-message {
+  font-family: var(--auth-font);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--auth-text-secondary);
+  margin: 0;
+  text-align: center;
+}
+
+.auth-state-message--success {
+  color: var(--auth-text);
+}
+
+.auth-iframe-banner {
+  padding: 10px 16px;
+  background: rgba(124, 58, 237, 0.12);
+  border-bottom: 1px solid var(--auth-border);
+  color: #c4b5fd;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: center;
+  font-family: var(--auth-font);
+}
+
+.auth-iframe-banner__link {
+  color: #a78bfa;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.auth-iframe-banner__link:hover {
+  color: #c4b5fd;
+}
+
+/* Clerk component overrides — premium card and controls (Clerk uses cl-* classes) */
+[class*="cl-rootBox"],
+[class*="cl-cardBox"] {
+  background: var(--auth-surface) !important;
+  border: 1px solid var(--auth-border) !important;
+  border-radius: var(--auth-radius) !important;
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.03) !important;
+}
+
+[class*="cl-formButtonPrimary"],
+[class*="cl-socialButtonsBlockButton"] button {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  transition: background-color 0.2s ease, transform 0.05s ease !important;
+}
+
+[class*="cl-formButtonPrimary"]:hover,
+[class*="cl-socialButtonsBlockButton"] button:hover {
+  transform: translateY(-0.5px);
+}
+
+[class*="cl-formFieldInput"] input,
+[class*="cl-input"] {
+  border-radius: 10px !important;
+  background: var(--auth-surface-elevated) !important;
+}
+
+[class*="cl-headerTitle"] {
+  font-family: var(--auth-font) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+}
+
+[class*="cl-headerSubtitle"] {
+  font-family: var(--auth-font) !important;
+  color: var(--auth-text-secondary) !important;
+}
