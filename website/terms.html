@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Terms of Use — ReStock Pro</title>
+  <link rel="icon" type="image/png" href="icon16.png" sizes="16x16">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07080c;
+      --surface: #0d0f14;
+      --text: #f8f9fc;
+      --text-secondary: rgba(248, 249, 252, 0.72);
+      --text-tertiary: rgba(248, 249, 252, 0.55);
+      --accent: #8b5cf6;
+      --accent-hover: #9d6ffa;
+      --border: rgba(255,255,255,0.06);
+    }
+    * { box-sizing: border-box; }
+    html { height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    /* Single, non-repeating backdrop layer (avoids tiling artifacts on long pages) */
+    body { position: relative; isolation: isolate; }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(1200px 700px at 50% -140px, rgba(139,92,246,0.12), transparent 60%),
+        radial-gradient(900px 600px at 10% 20%, rgba(59,130,246,0.08), transparent 55%);
+      background-repeat: no-repeat;
+    }
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: clamp(1.5rem, 4vw, 2.5rem) 1.25rem 4.25rem;
+    }
+    h1 {
+      font-size: clamp(1.65rem, 2.2vw, 2.05rem);
+      font-weight: 700;
+      margin: 0 0 0.55rem;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .updated {
+      font-size: 0.9rem;
+      color: var(--text-tertiary);
+      margin-bottom: 2.15rem;
+      line-height: 1.5;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover { color: var(--accent-hover); text-decoration: underline; }
+    h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 2.35rem 0 0.8rem;
+      color: var(--text);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+    p, li {
+      color: var(--text-secondary);
+      margin: 0 0 0.75rem;
+    }
+    ul { padding-left: 1.25rem; }
+    li { margin-bottom: 0.35rem; }
+    .back {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    strong { color: var(--text); font-weight: 600; }
+
+    /* Premium reading rhythm */
+    .wrap > * { max-width: 72ch; }
+    p { font-size: 1rem; line-height: 1.75; }
+    li { line-height: 1.75; }
+    ul { margin: 0.25rem 0 0.9rem; }
+
+   /* Subtle section separators */
+    h2 { position: relative; padding-top: 1.15rem; }
+    h2::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 20%, rgba(139,92,246,0.14) 50%, rgba(255,255,255,0.08) 80%, transparent 100%);
+      opacity: 0.9;
+    }
+
+    .footer-meta {
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      font-size: 0.875rem;
+      color: var(--text-tertiary);
+    }
+    .footer-meta::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 20%, rgba(139,92,246,0.14) 50%, rgba(255,255,255,0.08) 80%, transparent 100%);
+      opacity: 0.9;
+    }
+    .footer-meta p { margin: 0; }
+    .footer-meta a.footer-logo {
+      display: flex;
+      align-items: center;
+      opacity: 0.65;
+      transition: opacity 0.2s ease;
+    }
+    .footer-meta a.footer-logo:hover { opacity: 1; }
+    .footer-meta a.footer-logo img {
+      height: 20px;
+      width: auto;
+      display: block;
+      vertical-align: middle;
+    }
+
+    /* Small-screen polish */
+    @media (max-width: 420px) {
+      .wrap { padding-left: 1rem; padding-right: 1rem; }
+      h2 { margin-top: 2.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="/" class="back">← Back to ReStock Pro</a>
+    <h1>Terms of Use</h1>
+    <p class="updated">Last updated: March 10, 2026<br>Estimated reading time: 5 minutes</p>
+
+    <h2>1. Acceptance</h2>
+    <p>These Terms of Use (“<strong>Terms</strong>”) are a binding agreement between you (“<strong>you</strong>,” “<strong>your</strong>”) and the developer and operator of ReStock Pro and the website getrestock.app (“<strong>we</strong>,” “<strong>us</strong>,” “<strong>our</strong>”). By installing, accessing, or using the ReStock Pro browser extension, visiting getrestock.app, signing up for our waitlist, or otherwise using any part of our service, you agree to these Terms and our Privacy Policy. If you do not agree, do not use the Service.</p>
+    <p>Your use of the Service constitutes your electronic signature and agreement to these Terms.</p>
+
+    <h2>2. Description of Service</h2>
+    <p>ReStock Pro is a browser extension and related web presence that attempts to monitor product and inventory information on third-party retail websites and to notify you when selected products may have changed status (e.g., restock, preorder availability). The “<strong>Service</strong>” includes the extension, the getrestock.app website, waitlist signup, and any associated APIs or backend systems.</p>
+    <p>The extension may access retailer product pages and related APIs solely for the purpose of checking availability and presenting product information and status to you.</p>
+    <p><strong>Important:</strong> We do not sell, list, or guarantee the availability of any products. We do not purchase products on your behalf. We are not affiliated with, endorsed by, or sponsored by any retailer (including but not limited to Target, Nike, or other sites the extension may monitor). Alerts are provided on a best-effort basis only and may be delayed, inaccurate, or unavailable due to technical limitations, changes to third-party sites, or other factors.</p>
+    <p>We may update the list of supported retailers and features at any time. Monitoring is subject to rate limits and may not detect all changes (for example, due to retailer site updates, anti-bot measures, caching, throttling, or other restrictions).</p>
+    <p>Monitoring frequency, detection accuracy, and alert timing may vary depending on technical conditions, retailer website changes, rate limits, or other external factors.</p>
+    <p>Monitoring only occurs for products that the user explicitly chooses to track within the extension. The extension performs availability checks solely to provide notifications or status updates requested by the user and does not monitor websites unrelated to user-selected items.</p>
+    <p>The Service retrieves publicly available product and availability information from third-party websites selected by the user. The Service does not attempt to bypass authentication systems, paywalls, or technical access controls. Retailers may modify or restrict access to their websites or APIs at any time, which may affect or prevent the Service from functioning. We do not guarantee compatibility with any retailer and are not responsible for changes made by third-party websites or services.</p>
+
+    <h2>3. Eligibility</h2>
+    <p>You must be at least 13 years of age (or the minimum age in your jurisdiction to consent to use online services, if higher) to use the Service. If you are under 18, you represent that you have your parent’s or guardian’s permission to use the Service and to provide information to us. We do not knowingly collect personal information from children under 13. If you believe a child under 13 has provided us information, contact us and we will take reasonable steps to delete it.</p>
+    <p>You must have the legal capacity to enter into a binding agreement and must not be prohibited from using the Service under applicable law. The Service is offered from the United States; we make no representation that it is appropriate or available outside the United States.</p>
+
+    <h2>4. Waitlist and Information You Provide</h2>
+    <p>If you sign up for our waitlist or otherwise provide contact or other information, you agree to provide accurate and current information. You may unsubscribe from launch or product emails at any time using the link in those emails or by contacting us.</p>
+
+    <h2>5. Acceptable Use</h2>
+    <p>You agree to use the Service only for lawful, personal, non-commercial purposes. You will not:</p>
+    <ul>
+      <li>Use the Service in any way that violates applicable law or the terms or policies of any third-party site (including retailers and the Chrome Web Store).</li>
+      <li>Use the Service to harass, abuse, defame, or harm others, or to send spam or unsolicited communications.</li>
+      <li>Attempt to gain unauthorized access to our or any third party’s systems, networks, or data.</li>
+      <li>Reverse engineer, decompile, disassemble, or attempt to derive source code from the Service or the extension, except to the extent expressly permitted by applicable law.</li>
+      <li>Circumvent, disable, or interfere with any technical or legal restrictions (including rate limits, access controls, or terms of use) imposed by us or by any third-party site.</li>
+      <li>Resell, sublicense, or commercially exploit the Service or any data derived from it without our prior written consent.</li>
+      <li>Use automated means (e.g., bots, scripts) to interact with the Service in a way that exceeds normal personal use or that could harm the Service or third-party sites.</li>
+      <li>Use the Service in a way that imposes an unreasonable or disproportionate load on our systems or third-party sites (for example, excessive monitoring requests, rapid repeated refreshes, or attempts to bypass rate limits).</li>
+      <li>Use the Service for large-scale purchasing, resale automation, commercial scalping, or other commercial exploitation, including use primarily intended to facilitate reselling products for profit.</li>
+    </ul>
+    <p>You are responsible for ensuring that your use of the Service complies with the terms, policies, and conditions of any third-party website you monitor. We do not control and are not responsible for the policies or restrictions of third-party retailers or platforms.</p>
+    <p>We may impose technical limits (for example, limits on monitoring frequency, background checks, or the number of tracked items) to protect the Service, users, and third-party sites.</p>
+    <p>We may suspend or terminate your access if we reasonably believe you have violated these Terms or applicable law.</p>
+
+    <h2>6. Intellectual Property</h2>
+    <p>ReStock Pro, getrestock.app, and all associated names, logos, designs, text, code, and other content are owned by us or our licensors. We grant you a limited, non-exclusive, non-transferable, revocable license to use the Service for your personal use in accordance with these Terms. You do not acquire any ownership or other rights. You may not copy, modify, distribute, or create derivative works from the Service or our branding without our written permission. Product names, logos, and trademarks of retailers are the property of their respective owners; we use them only to describe the functionality of the Service.</p>
+
+    <h2>7. Privacy and Data</h2>
+    <p>Our collection and use of personal and other data is described in our <a href="/privacy.html">Privacy Policy</a>. By using the Service, you consent to that collection and use. If you do not agree with our Privacy Policy, do not use the Service.</p>
+    <p><strong>In summary:</strong> When you join the waitlist, we collect your email and basic technical information (such as IP address, approximate location, and referrer) to operate the waitlist, prevent abuse, and improve the Service. The extension runs in your browser and checks product pages you choose to monitor; it uses your settings (such as ZIP code) to perform availability checks. See the Privacy Policy for details.</p>
+    <p><strong>International processing:</strong> We are based in the United States. If you access the Service from outside the U.S., you understand that information may be processed and stored in the U.S. and other jurisdictions where we or our service providers operate, and those jurisdictions may have different data protection laws than your location.</p>
+
+    <h2>8. User Submissions</h2>
+    <p>If you submit feedback, suggestions, ideas, feature requests, bug reports, or other materials (collectively, “<strong>Submissions</strong>”), you grant us a non-exclusive, worldwide, royalty-free, perpetual, irrevocable, sublicensable license to use, reproduce, modify, publish, translate, create derivative works from, distribute, and display those Submissions for any purpose related to operating, improving, and marketing the Service. You represent that you have all rights necessary to grant this license and that your Submissions do not infringe or violate any third-party rights.</p>
+
+    <h2>9. Third-Party Services and Sites</h2>
+    <p>The Service relies on and may link to third-party websites, APIs, and services (including retailers, Google Chrome, the Chrome Web Store, and hosting providers). We do not control and are not responsible for third-party content, availability, or practices. Your use of those services is subject to their respective terms and policies. We do not endorse and are not affiliated with any retailer or other third party. Any reference to a product or retailer is for identification only.</p>
+    <p>You are solely responsible for any purchases or interactions on third-party sites, including compliance with their payment, shipping, return, and other terms and policies.</p>
+
+    <h2>10. Disclaimers</h2>
+    <p><strong>THE SERVICE IS PROVIDED “AS IS” AND “AS AVAILABLE” WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.</strong></p>
+    <p>We do not warrant that the Service will be uninterrupted, error-free, secure, or free of harmful components. We do not warrant the accuracy, timeliness, or completeness of any alert, notification, or data. We do not guarantee that any product will be available for purchase, that you will be able to complete a purchase, or that third-party sites will remain accessible or unchanged. You use the Service and rely on any information at your sole risk.</p>
+
+    <h2>11. Limitation of Liability</h2>
+    <p><strong>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:</strong></p>
+    <ul>
+      <li><strong>WE (AND OUR OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, LICENSORS, AND SUPPLIERS) SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, PUNITIVE, OR EXEMPLARY DAMAGES</strong>, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, REVENUE, DATA, GOODWILL, OR USE, OR FOR THE COST OF SUBSTITUTE SERVICES, <strong>WHETHER BASED ON CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY, OR ANY OTHER THEORY</strong>, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</li>
+      <li><strong>OUR TOTAL AGGREGATE LIABILITY FOR ALL CLAIMS ARISING OUT OF OR RELATED TO THE SERVICE OR THESE TERMS SHALL NOT EXCEED THE GREATER OF (A) THE AMOUNT YOU PAID US IN THE TWELVE (12) MONTHS BEFORE THE CLAIM AROSE, OR (B) ONE HUNDRED U.S. DOLLARS ($100).</strong></li>
+      <li>Some jurisdictions do not allow the exclusion of implied warranties or the limitation of liability for incidental or consequential damages. In such jurisdictions, our liability will be limited to the maximum extent permitted by law.</li>
+    </ul>
+
+    <h2>12. Indemnification</h2>
+    <p>To the extent permitted by law, you agree to indemnify, defend, and hold harmless us and our officers, directors, employees, agents, licensors, and suppliers from and against any and all claims, damages, losses, costs, and expenses (including reasonable attorneys’ fees) arising out of or related to: (a) your use of the Service; (b) your violation of these Terms or any applicable law; (c) your violation of any third-party right, including intellectual property or privacy; or (d) any dispute between you and a third party relating to the Service or your use of third-party sites.</p>
+
+    <h2>13. Termination</h2>
+    <p>We may modify, suspend, or discontinue the Service (or any part of it) at any time, with or without notice. We may terminate or suspend your access immediately if you breach these Terms or for any other reason at our discretion. Upon termination, your right to use the Service ceases. Sections that by their nature should survive (including Disclaimers, Limitation of Liability, Indemnification, and General) will survive. You may stop using the Service at any time by uninstalling the extension and unsubscribing from our emails.</p>
+    <p>After termination, we may retain and delete information as described in our <a href="/privacy.html">Privacy Policy</a>.</p>
+
+    <h2>14. Changes to the Service and These Terms</h2>
+    <p>We may change the Service and these Terms from time to time. We will post the updated Terms on this page and update the “Last updated” date. For material changes, we may also notify you by email or through the Service where practicable. Material changes may include, for example, changes to fees (if introduced), changes to our data practices, or changes to liability limits. Your continued use of the Service after the effective date of the changes constitutes acceptance of the revised Terms. If you do not agree, you must stop using the Service. We encourage you to review this page periodically.</p>
+
+    <h2>15. General</h2>
+    <p><strong>Governing law:</strong> These Terms are governed by the laws of the State of Delaware, United States, without regard to conflict-of-law principles.</p>
+    <p><strong>Disputes:</strong> Dispute resolution is described in Section 16 below.</p>
+    <p><strong>Severability:</strong> If any provision of these Terms is held invalid or unenforceable, the remaining provisions will remain in effect.</p>
+    <p><strong>Waiver:</strong> Our failure to enforce any right or provision of these Terms will not constitute a waiver of that right or provision.</p>
+    <p><strong>Entire agreement:</strong> These Terms, together with our Privacy Policy and any other policies we reference, constitute the entire agreement between you and us regarding the Service and supersede any prior agreements.</p>
+    <p><strong>Assignment:</strong> You may not assign or transfer these Terms or your rights hereunder without our consent. We may assign our rights and obligations without restriction.</p>
+    <p><strong>Force majeure:</strong> We are not liable for any failure or delay due to circumstances beyond our reasonable control (e.g., acts of God, war, terrorism, pandemics, strikes, internet or infrastructure failures, actions of third parties, or changes to third-party websites, services, or APIs that the Service relies on).</p>
+    <p><strong>International use:</strong> If you access the Service from outside the United States, you are responsible for compliance with local laws and regulations that may apply to you.</p>
+    <p><strong>Contact:</strong> For questions about these Terms, contact us at <a href="mailto:legal@getrestock.app">legal@getrestock.app</a> (or the contact address published on getrestock.app).</p>
+
+    <h2>16. Arbitration and Class Action Waiver</h2>
+    <p><strong>Informal resolution:</strong> Before initiating arbitration, you agree to contact us at <a href="mailto:legal@getrestock.app">legal@getrestock.app</a> and provide a brief description of the dispute and your contact information. We will attempt in good faith to resolve the dispute informally within thirty (30) days.</p>
+    <p><strong>Binding arbitration:</strong> Except for disputes that qualify for small claims court or claims for injunctive or equitable relief related to intellectual property or misuse of the Service, any dispute, claim, or controversy arising out of or relating to these Terms or the Service will be resolved by binding arbitration administered by the American Arbitration Association (“<strong>AAA</strong>”) under its Consumer Arbitration Rules. The arbitration will be conducted in English. Judgment on the arbitration award may be entered in any court having jurisdiction.</p>
+    <p><strong>Class action waiver:</strong> You and we agree that any dispute resolution will occur on an individual basis only and not in a class, consolidated, or representative action. To the fullest extent permitted by law, you waive any right to participate in a class action lawsuit or class arbitration against us.</p>
+
+    <div class="footer-meta">
+      <p>© 2026 ReStock Pro. All rights reserved.</p>
+      <a href="/" class="footer-logo" aria-label="ReStock Pro home"><img src="logospb.png" alt=""></a>
+    </div>
+  </div>
+</body>
+</html>

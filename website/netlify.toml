@@ -1,0 +1,14 @@
+# Optional: use if you deploy with Netlify. Run prepare-auth-deploy.sh first, or use the build command below.
+[build]
+  command = "cd auth && npm install && npm run build && cd .. && sh scripts/prepare-auth-deploy.sh"
+  publish = "."
+
+[[redirects]]
+  from = "/auth"
+  to = "/auth-build/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/auth/*"
+  to = "/auth-build/:splat"
+  status = 200
