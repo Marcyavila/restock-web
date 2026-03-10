@@ -184,6 +184,10 @@
       font-family: inherit;
       color: var(--text);
       background: rgba(255,255,255,0.04);
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%239ca3af' stroke-width='1.6'%3E%3Ccircle cx='9' cy='9' r='4.5'/%3E%3Cpath d='M12.5 12.5 15.5 15.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 0.8rem center;
+      background-size: 15px 15px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       outline: none;
@@ -356,6 +360,11 @@
       vertical-align: middle;
     }
 
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
     /* Premium reading rhythm */
     .wrap > * { max-width: 72ch; }
     .wrap > .main-surface { max-width: none; }
@@ -365,7 +374,85 @@
       .wrap { padding-left: 1rem; padding-right: 1rem; }
       h2 { margin-top: 2.1rem; }
     }
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
   </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does ReStock Pro do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ReStock Pro is a Chrome extension that monitors product pages (for example, at Target and other stores) and notifies you when items restock or become available for preorder, so you don\u2019t have to keep checking manually."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often does ReStock Pro check for restocks?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ReStock Pro checks selected product pages periodically in the background. The frequency may vary depending on store restrictions, rate limits, and system load."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why am I not getting restock alerts?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Make sure notifications are enabled in Chrome and that the extension is allowed to show alerts. Also verify your browser is running and the extension is enabled. If you\u2019re still not seeing alerts, email us with the product link you\u2019re tracking and what you expected versus what happened."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "The extension icon disappeared \u2014 what happened?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Open Chrome, go to Extensions, then Manage Extensions. Find ReStock Pro and make sure it is enabled."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I get early access?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Join the waitlist on our homepage with your email. We\u2019ll send one email when the extension is available on the Chrome Web Store."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Alerts seem wrong or delayed\u2014why?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We rely on how stores display their pages. If a site changes its layout or blocks automated checks, alerts can be delayed or incorrect. If alerts stop working for a specific store, it usually means the retailer updated their website. Send us the product link and we\u2019ll investigate."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which stores are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We currently support Target and are working on more. If you have a store you\u2019d like us to add, email us \u2014 we use that feedback to prioritize."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I request a store or feature?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Send us the store name and a product link (or a few examples). We prioritize additions based on user demand and feasibility."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <div class="wrap">
@@ -445,7 +532,7 @@
       </ul>
       <p style="margin-top: 0.5rem;">If everything looks correct and alerts still aren't working, send us the product link and we'll investigate.</p>
     </div>
-    <p class="still-stuck">Still stuck? Send us the product link and we'll look into it.</p>
+    <p class="still-stuck">Still stuck? Send us the product link and we’ll investigate.</p>
     <div class="contact-card">
       <a href="mailto:support@getrestock.app" class="support-email" aria-label="Email ReStock Pro support">support@getrestock.app</a>
       <p class="trust-line">We read every message.</p>
@@ -475,19 +562,51 @@
       var listEl = document.getElementById('faq-list');
       var noResultsEl = document.getElementById('faq-no-results');
       if (!searchEl || !listEl) return;
-      var items = listEl.querySelectorAll('.faq-item');
-      searchEl.addEventListener('input', function () {
+      var items = Array.prototype.slice.call(listEl.querySelectorAll('.faq-item'));
+
+      // Single-open accordion behavior
+      items.forEach(function (item) {
+        item.addEventListener('toggle', function () {
+          if (item.open) {
+            items.forEach(function (other) {
+              if (other !== item) other.open = false;
+            });
+          }
+        });
+      });
+
+      function runSearch() {
         var q = (searchEl.value || '').trim().toLowerCase();
         var visible = 0;
         items.forEach(function (item) {
-          var summary = item.querySelector('summary');
-          var text = (summary ? summary.textContent : item.textContent).toLowerCase();
+          var text = item.textContent.toLowerCase();
           var match = !q || text.indexOf(q) !== -1;
           item.classList.toggle('hidden', !match);
-          if (match) visible++;
+          if (match) {
+            visible++;
+            item.open = q.length > 0; // auto-expand matches when searching
+          } else if (q.length > 0) {
+            item.open = false;
+          }
         });
         if (noResultsEl) noResultsEl.classList.toggle('visible', q.length > 0 && visible === 0);
+      }
+
+      var timeout;
+      searchEl.addEventListener('input', function () {
+        clearTimeout(timeout);
+        timeout = setTimeout(runSearch, 150);
       });
+
+      // Chrome Web Store card visibility: show when link has a real href
+      var installCard = document.getElementById('install-card');
+      if (installCard) {
+        var link = installCard.querySelector('a[href]');
+        if (link && link.getAttribute('href') && link.getAttribute('href') !== '#') {
+          installCard.classList.remove('hidden');
+          installCard.removeAttribute('aria-hidden');
+        }
+      }
     })();
   </script>
 </body>
