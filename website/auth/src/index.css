@@ -167,16 +167,15 @@ body {
   transition: background-color 0.2s ease, transform 0.05s ease, box-shadow 0.2s ease !important;
 }
 
-/* Remove inner wrapper background so button is one flat purple surface */
-.auth-layout__card [class*="cl-formButtonPrimary"] > *,
-[class*="cl-formButtonPrimary"] > *,
-.auth-layout__card [class*="cl-formButtonPrimary"] span,
-[class*="cl-formButtonPrimary"] span,
-.auth-layout__card [class*="cl-formButtonPrimary"] svg,
-[class*="cl-formButtonPrimary"] svg {
+/* Remove inner wrapper/box so button is one flat purple surface (no black box around text) */
+.auth-layout__card [class*="cl-formButtonPrimary"] *,
+[class*="cl-formButtonPrimary"] * {
   background: transparent !important;
+  background-color: transparent !important;
   color: inherit !important;
   fill: currentColor !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .auth-layout__card [class*="cl-formButtonPrimary"]:hover,
