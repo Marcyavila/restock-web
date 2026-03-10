@@ -251,38 +251,6 @@ body {
   box-shadow: 0 0 0 2px var(--auth-surface), 0 0 0 4px var(--auth-accent) !important;
 }
 
-/* "Last used" and other form-field hints — prevent overlap with buttons, align and size */
-.auth-layout__card [class*="cl-formFieldLabelRow"],
-.auth-layout__card [class*="cl-formFieldHint"],
-.auth-layout__card [class*="cl-formField"] > div:first-child,
-.auth-layout__card [class*="cl-internal"] [class*="label"] {
-  margin-bottom: 8px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  flex-wrap: wrap !important;
-  gap: 6px !important;
-}
-
-.auth-layout__card [class*="cl-formFieldHint"],
-.auth-layout__card [class*="cl-badge"],
-.auth-layout__card [class*="cl-formField"] [class*="optional"],
-.auth-layout__card [class*="cl-internal"] span[class*="hint"] {
-  font-size: 0.75rem !important;
-  color: var(--auth-text-secondary) !important;
-  font-weight: 500 !important;
-  margin-bottom: 0 !important;
-  padding: 2px 8px !important;
-  border-radius: 6px !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-}
-
-/* Social buttons container — space above so "Last used" doesn’t overlap */
-.auth-layout__card [class*="cl-socialButtonsBlockButton"],
-.auth-layout__card [class*="cl-socialButtons"] {
-  margin-top: 12px !important;
-}
-
 /* Social buttons (Discord, Google) — one flat surface, clear border, no inner recess */
 .auth-layout__card [class*="cl-socialButtonsBlockButton"] button,
 .auth-layout__card [class*="cl-socialButtons"] button,

@@ -19,7 +19,16 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** When user arrives from the extension with ?from_extension=1, sign out first so they always see the sign-in form and can choose Google/Discord/email (and which account). */
+function isReturningFromOAuth(): boolean {
+  if (typeof document === "undefined") return false;
+  const r = document.referrer || "";
+  return (
+    /^https?:\/\/(accounts\.google\.com|.*\.clerk\.accounts\.dev|discord\.com)/i.test(r) ||
+    r.includes("clerk.accounts")
+  );
+}
+
+/** When user arrives from the extension with ?from_extension=1, sign out first so they see the sign-in form — but NOT when they're returning from OAuth, or we'd sign them out right after Google/Discord sign-in. */
 function ForceSignInIfFromExtension({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth();
   const { signOut } = useClerk();
@@ -30,6 +39,7 @@ function ForceSignInIfFromExtension({ children }: { children: React.ReactNode })
     if (!isLoaded || !isSignedIn) return;
     const params = new URLSearchParams(location.search);
     if (params.get("from_extension") !== "1") return;
+    if (isReturningFromOAuth()) return;
 
     setSigningOut(true);
     const authBase = `${window.location.origin}/auth`;
@@ -42,7 +52,13 @@ function ForceSignInIfFromExtension({ children }: { children: React.ReactNode })
       });
   }, [isLoaded, isSignedIn, signOut, location.search]);
 
-  if (signingOut || (isLoaded && isSignedIn && new URLSearchParams(location.search).get("from_extension") === "1")) {
+  const wantForceSignOut =
+    new URLSearchParams(location.search).get("from_extension") === "1" &&
+    isLoaded &&
+    isSignedIn &&
+    !isReturningFromOAuth();
+
+  if (signingOut || wantForceSignOut) {
     return (
       <div className="auth-page">
         <p className="auth-state-message">Signing out so you can choose how to sign in…</p>
