@@ -251,32 +251,72 @@ body {
   box-shadow: 0 0 0 2px var(--auth-surface), 0 0 0 4px var(--auth-accent) !important;
 }
 
-/* Social buttons (Discord, Google) */
+/* Social buttons (Discord, Google) — clearly look like buttons with visible border */
 .auth-layout__card [class*="cl-socialButtonsBlockButton"] button,
-[class*="cl-socialButtonsBlockButton"] button {
+.auth-layout__card [class*="cl-socialButtons"] button,
+[class*="cl-socialButtonsBlockButton"] button,
+[class*="cl-socialButtons"] button {
   border-radius: 10px !important;
   font-weight: 600 !important;
   font-family: var(--auth-font) !important;
-  background: var(--auth-surface-elevated) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
   color: var(--auth-text) !important;
-  border: 1px solid var(--auth-border) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
   padding: 12px 20px !important;
   min-height: 44px !important;
   cursor: pointer !important;
   transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.05s ease !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
 
 .auth-layout__card [class*="cl-socialButtonsBlockButton"] button:hover,
-[class*="cl-socialButtonsBlockButton"] button:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+.auth-layout__card [class*="cl-socialButtons"] button:hover,
+[class*="cl-socialButtonsBlockButton"] button:hover,
+[class*="cl-socialButtons"] button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
   transform: translateY(-0.5px);
 }
 
 .auth-layout__card [class*="cl-socialButtonsBlockButton"] button:focus-visible,
-[class*="cl-socialButtonsBlockButton"] button:focus-visible {
+.auth-layout__card [class*="cl-socialButtons"] button:focus-visible,
+[class*="cl-socialButtonsBlockButton"] button:focus-visible,
+[class*="cl-socialButtons"] button:focus-visible {
   outline: none !important;
   box-shadow: 0 0 0 2px var(--auth-surface), 0 0 0 4px var(--auth-accent) !important;
+}
+
+/* Social as link (if Clerk uses <a> instead of button) */
+.auth-layout__card [class*="cl-socialButtonsBlockButton"] a,
+.auth-layout__card [class*="cl-socialButtons"] a,
+[class*="cl-socialButtonsBlockButton"] a,
+[class*="cl-socialButtons"] a {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-family: var(--auth-font) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--auth-text) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  padding: 12px 20px !important;
+  min-height: 44px !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.05s ease !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.auth-layout__card [class*="cl-socialButtonsBlockButton"] a:hover,
+.auth-layout__card [class*="cl-socialButtons"] a:hover,
+[class*="cl-socialButtonsBlockButton"] a:hover,
+[class*="cl-socialButtons"] a:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  transform: translateY(-0.5px);
+  color: var(--auth-text) !important;
 }
 
 /* Inputs (email, password) — visible border; exclude OTP so Clerk's 6-digit UI works */
