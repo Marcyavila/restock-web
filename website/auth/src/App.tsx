@@ -120,6 +120,69 @@ function LogoutDone() {
   );
 }
 
+/** Convex HTTP base URL for createCheckoutSession (set VITE_CONVEX_SITE_URL in .env to match extension). */
+const CONVEX_HTTP_URL =
+  (typeof import.meta !== "undefined" && (import.meta as { env?: { VITE_CONVEX_SITE_URL?: string } }).env?.VITE_CONVEX_SITE_URL) ||
+  "https://vibrant-gopher-82.convex.site";
+
+/** Redirect signed-in users to Stripe Checkout; otherwise show sign-in with redirect back here. */
+function CheckoutRedirect() {
+  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const [error, setError] = React.useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) return;
+    let cancelled = false;
+    getToken()
+      .then((token) => {
+        if (cancelled || !token) return;
+        return fetch(`${CONVEX_HTTP_URL}/createCheckoutSession`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      })
+      .then((res) => {
+        if (cancelled) return;
+        if (!res?.ok) throw new Error("Could not start checkout");
+        return res!.json();
+      })
+      .then((data: { url?: string }) => {
+        if (cancelled || !data?.url) return;
+        window.location.href = data.url;
+      })
+      .catch(() => {
+        if (!cancelled) setError("Could not start checkout. Try again or use the extension.");
+      });
+    return () => { cancelled = true; };
+  }, [isLoaded, isSignedIn, getToken]);
+
+  if (!isLoaded) return <div className="auth-page"><p className="auth-state-message">Loading…</p></div>;
+  if (!isSignedIn) {
+    const checkoutReturn = `${window.location.origin}/auth/checkout`;
+    return (
+      <AuthLayout>
+        <SignIn forceRedirectUrl={checkoutReturn} signUpUrl="/auth/sign-up" />
+        <p style={{ marginTop: "1rem", fontSize: "0.9rem", opacity: 0.8 }}>
+          Sign in to continue to checkout.
+        </p>
+      </AuthLayout>
+    );
+  }
+  if (error) {
+    return (
+      <div className="auth-page">
+        <p className="auth-state-message" style={{ color: "var(--clerk-error)" }}>{error}</p>
+      </div>
+    );
+  }
+  return (
+    <div className="auth-page">
+      <p className="auth-state-message">Redirecting to checkout…</p>
+    </div>
+  );
+}
+
 // Force redirect to /auth/connect after sign-in so we can pass token to extension (full URL so Clerk respects it)
 const connectUrl = typeof window !== "undefined" ? `${window.location.origin}/auth/connect` : "/auth/connect";
 
@@ -144,6 +207,7 @@ export default function App() {
           }
         />
         <Route path="/connect" element={<ConnectExtension />} />
+        <Route path="/checkout" element={<CheckoutRedirect />} />
         <Route path="/logout" element={<LogoutPage />} />
         <Route path="/logout/done" element={<LogoutDone />} />
         <Route path="/extension-callback" element={<ExtensionCallback />} />
