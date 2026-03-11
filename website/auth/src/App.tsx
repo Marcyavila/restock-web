@@ -10,8 +10,6 @@ const logoUrl =
 function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="auth-page">
-      <div className="auth-layout__brand">
-      </div>
       <div className="auth-layout__card">
         <div className="auth-card__logoRow" aria-hidden="true">
           <img src={logoUrl} alt="" className="auth-card__logo" />
