@@ -69,10 +69,15 @@ function ExtensionCallback() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
-    if (!token) return;
-    if (window.self !== window.top) {
+    const inIframe = window.self !== window.top;
+    if (inIframe) {
       try {
-        window.parent.postMessage({ type: "AUTH_CALLBACK", token }, "*");
+        if (token) {
+          window.parent.postMessage({ type: "AUTH_CALLBACK", token }, "*");
+        } else {
+          // Success page (no token in URL): tell parent to re-read storage so popup hides gate
+          window.parent.postMessage({ type: "RESTOCK_AUTH_SUCCESS" }, "*");
+        }
       } catch (_) {}
     }
   }, [location.search]);
