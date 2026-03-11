@@ -6,6 +6,7 @@
   "rewrites": [
     { "source": "/auth/assets/:path*", "destination": "/auth-build/assets/:path*" },
     { "source": "/auth", "destination": "/auth-build/index.html" },
-    { "source": "/auth/:path*", "destination": "/auth-build/index.html" }
+    { "source": "/auth/:path*", "destination": "/auth-build/index.html" },
+    { "source": "/upgrade", "destination": "/upgrade.html" }
   ]
 }
