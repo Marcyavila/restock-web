@@ -122,13 +122,25 @@ body {
   overflow: hidden;
 }
 
-/* Force Clerk card and all inner content to dark theme (Clerk may still render light without this) */
-.auth-layout__card > *,
+/* Set Clerk content colors without painting big inner panels. */
 .auth-layout__card [class*="cl-"],
 .auth-layout__card [class*="clerk"] {
-  background: var(--auth-surface) !important;
   color: var(--auth-text) !important;
   border-color: var(--auth-border) !important;
+}
+
+/* Keep layout wrappers transparent so our card wrapper stays the only “surface”. */
+.auth-layout__card > *,
+.auth-layout__card [class*="cl-main"],
+.auth-layout__card [class*="cl-contents"],
+.auth-layout__card [class*="cl-page"],
+.auth-layout__card [class*="cl-navbar"],
+.auth-layout__card [class*="cl-footer"],
+.auth-layout__card [class*="cl-form"],
+.auth-layout__card [class*="cl-socialButtons"],
+.auth-layout__card [class*="cl-divider"] {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Exclude OTP/code input — Clerk uses a transparent input over 6 digit cells; our styles would break it */
@@ -271,6 +283,12 @@ body {
 /* Reduce extra space above social buttons block (varies by Clerk version). */
 .auth-layout__card [class*="cl-socialButtons"] {
   margin-top: 10px !important;
+}
+
+/* Remove any extra "panel" wrapper around social + form blocks. */
+.auth-layout__card [class*="cl-socialButtonsBlock"],
+.auth-layout__card [class*="cl-socialButtonsBlock"] * {
+  background: transparent !important;
 }
 
 /* Primary button (Continue) — flat style, no inner box */
