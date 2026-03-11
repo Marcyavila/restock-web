@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { SignIn, useAuth, useClerk } from "@clerk/clerk-react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
+// Use your site-hosted logo asset (not Clerk's uploaded logo).
 const logoUrl =
   typeof window !== "undefined" ? `${window.location.origin}/logospb.png` : "/logospb.png";
 
@@ -10,7 +11,6 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="auth-page">
       <div className="auth-layout__brand">
-        <h1 className="auth-layout__title">ReStock Pro</h1>
       </div>
       <div className="auth-layout__card">
         <div className="auth-card__logoRow" aria-hidden="true">
