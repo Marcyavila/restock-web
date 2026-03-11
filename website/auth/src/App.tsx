@@ -19,51 +19,22 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-function isReturningFromOAuth(): boolean {
-  if (typeof document === "undefined") return false;
-  const r = document.referrer || "";
-  return (
-    /^https?:\/\/(accounts\.google\.com|.*\.clerk\.accounts\.dev|discord\.com)/i.test(r) ||
-    r.includes("clerk.accounts")
-  );
-}
-
-/** When user arrives from the extension with ?from_extension=1, sign out first so they see the sign-in form — but NOT when they're returning from OAuth, or we'd sign them out right after Google/Discord sign-in. */
+/**
+ * When user arrives from the extension (?from_extension=1):
+ * - If signed in → redirect to /auth/connect so the token is sent to the extension (no sign-out).
+ *   This avoids signing users out immediately after Google/Discord OAuth (referrer-based
+ *   detection is unreliable when referrer is stripped).
+ * - If not signed in → show the sign-in form as usual.
+ */
 function ForceSignInIfFromExtension({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth();
-  const { signOut } = useClerk();
   const location = useLocation();
-  const [signingOut, setSigningOut] = React.useState(false);
 
-  useEffect(() => {
-    if (!isLoaded || !isSignedIn) return;
-    const params = new URLSearchParams(location.search);
-    if (params.get("from_extension") !== "1") return;
-    if (isReturningFromOAuth()) return;
+  if (!isLoaded) return null;
 
-    setSigningOut(true);
-    const authBase = `${window.location.origin}/auth`;
-    signOut()
-      .then(() => {
-        window.location.replace(authBase);
-      })
-      .catch(() => {
-        window.location.replace(authBase);
-      });
-  }, [isLoaded, isSignedIn, signOut, location.search]);
-
-  const wantForceSignOut =
-    new URLSearchParams(location.search).get("from_extension") === "1" &&
-    isLoaded &&
-    isSignedIn &&
-    !isReturningFromOAuth();
-
-  if (signingOut || wantForceSignOut) {
-    return (
-      <div className="auth-page">
-        <p className="auth-state-message">Signing out so you can choose how to sign in…</p>
-      </div>
-    );
+  const params = new URLSearchParams(location.search);
+  if (params.get("from_extension") === "1" && isSignedIn) {
+    return <Navigate to="/auth/connect" replace />;
   }
 
   return <>{children}</>;
