@@ -10,11 +10,14 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="auth-page">
       <div className="auth-layout__brand">
-        <img src={logoUrl} alt="" className="auth-layout__logo" />
         <h1 className="auth-layout__title">ReStock Pro</h1>
-        <p className="auth-layout__tagline">Sign in to sync your account</p>
       </div>
-      <div className="auth-layout__card">{children}</div>
+      <div className="auth-layout__card">
+        <div className="auth-card__logoRow" aria-hidden="true">
+          <img src={logoUrl} alt="" className="auth-card__logo" />
+        </div>
+        {children}
+      </div>
     </div>
   );
 }

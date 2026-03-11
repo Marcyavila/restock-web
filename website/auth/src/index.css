@@ -74,6 +74,21 @@ body {
   margin-bottom: 24px;
 }
 
+.auth-card__logoRow {
+  display: flex;
+  justify-content: center;
+  padding: 18px 16px 10px;
+  margin: 0;
+}
+.auth-card__logo {
+  height: 34px;
+  width: auto;
+  opacity: 0.98;
+  filter: drop-shadow(0 10px 22px rgba(0,0,0,0.55));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 .auth-layout__logo {
   height: 32px;
   width: auto;
