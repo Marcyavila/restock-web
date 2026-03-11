@@ -188,6 +188,13 @@ body {
   display: none !important;
 }
 
+/* Hide Clerk's built-in logo inside the card (we show our own brand above). */
+.auth-layout__card [class*="cl-logoImage"],
+.auth-layout__card [class*="cl-header"] [class*="cl-logo"],
+.auth-layout__card [class*="cl-header"] img {
+  display: none !important;
+}
+
 .auth-state-message {
   font-family: var(--auth-font);
   font-size: 0.9375rem;

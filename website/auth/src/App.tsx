@@ -30,7 +30,13 @@ function ForceSignInIfFromExtension({ children }: { children: React.ReactNode })
   const { isSignedIn, isLoaded } = useAuth();
   const location = useLocation();
 
-  if (!isLoaded) return null;
+  if (!isLoaded) {
+    return (
+      <div className="auth-page">
+        <p className="auth-state-message">Loading…</p>
+      </div>
+    );
+  }
 
   const params = new URLSearchParams(location.search);
   if (params.get("from_extension") === "1" && isSignedIn) {
