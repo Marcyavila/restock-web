@@ -215,6 +215,15 @@ body {
   display: none !important;
 }
 
+/* Collapse Clerk's header area entirely (otherwise it leaves empty space). */
+.auth-layout__card [class*="cl-header"],
+.auth-layout__card [class*="cl-cardHeader"] {
+  display: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 0 !important;
+}
+
 .auth-state-message {
   font-family: var(--auth-font);
   font-size: 0.9375rem;
