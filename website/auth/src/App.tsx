@@ -21,7 +21,7 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 
 /**
  * When user arrives from the extension (?from_extension=1):
- * - If signed in → redirect to /auth/connect so the token is sent to the extension (no sign-out).
+ * - If signed in → redirect to /connect (resolves to /auth/connect with basename) so the token is sent to the extension (no sign-out).
  *   This avoids signing users out immediately after Google/Discord OAuth (referrer-based
  *   detection is unreliable when referrer is stripped).
  * - If not signed in → show the sign-in form as usual.
@@ -34,7 +34,7 @@ function ForceSignInIfFromExtension({ children }: { children: React.ReactNode })
 
   const params = new URLSearchParams(location.search);
   if (params.get("from_extension") === "1" && isSignedIn) {
-    return <Navigate to="/auth/connect" replace />;
+    return <Navigate to="/connect" replace />;
   }
 
   return <>{children}</>;
