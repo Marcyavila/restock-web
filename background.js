@@ -948,11 +948,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.storage.local.remove("stockStatuses").catch(() => {});
     const interval = Math.max(1, request.interval || 3);
     startPolling(interval);
+    sendResponse({ ok: true });
   } else if (request.action === "stop") {
     setBadgeState("off");
     stopPolling();
+    sendResponse({ ok: true });
   } else if (request.action === "checkNow") {
     checkStock(request.tcins && Array.isArray(request.tcins) ? request.tcins : null);
+    sendResponse({ ok: true });
   } else if (request.action === "getStatuses") {
     sendResponse({ statuses: lastStatuses });
   } else if (request.action === "resolveUpc") {
@@ -980,10 +983,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ ok: true });
     return true;
   } else if (request.type === "AUTH_CALLBACK" && request.token) {
-    chrome.storage.local.set({ authToken: request.token }, () => sendResponse({ ok: true }));
-    return true;
+    sendResponse({ ok: true });
+    chrome.storage.local.set({ authToken: request.token }).catch(() => {});
+    return false;
   }
-  return true;
+  return false;
 });
 
 chrome.alarms.onAlarm.addListener((a) => {

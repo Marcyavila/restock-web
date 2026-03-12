@@ -1212,10 +1212,11 @@
       color: #A78BFA;
       box-shadow: 0 0 12px rgba(139,92,246,0.15);
     }
-    body:not(.standalone-mode) .main-wrapper[data-bg="peek"] .settings-overlay {
+    body .main-wrapper[data-bg="peek"] .settings-overlay {
       background: rgba(8,9,14,0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      /* Apply blur only while opening/open/closing to avoid paint flicker */
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
     body:not(.standalone-mode) .main-wrapper[data-bg="peek"] .settings-overlay-card {
       box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
@@ -2251,49 +2252,178 @@
       position: absolute;
       inset: 0;
       z-index: 10;
-      background: var(--bg);
-      display: none;
+      background: transparent;
+      display: flex;
       flex-direction: column;
       overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(10px) translateZ(0);
+      transition:
+        opacity 220ms var(--ease),
+        transform 260ms var(--ease),
+        visibility 0s linear 260ms;
+      will-change: opacity, transform;
     }
-    .settings-overlay.is-open { display: flex; }
+
+    /* Dedicated blurred backdrop (animate opacity only for stability). */
+    .settings-overlay-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateZ(0);
+      background:
+        radial-gradient(120% 80% at 50% 0%, rgba(139, 92, 246, 0.12) 0%, transparent 58%),
+        radial-gradient(80% 60% at 50% 0%, rgba(255,255,255,0.06) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(8, 9, 14, 0.70) 0%, rgba(8, 9, 14, 0.78) 100%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: opacity 280ms var(--ease);
+      will-change: opacity;
+    }
+
+    /* Settings sheet content sits above the backdrop */
+    .settings-overlay-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      height: 100%;
+      background:
+        radial-gradient(120% 80% at 50% 0%, rgba(139, 92, 246, 0.10) 0%, transparent 55%),
+        linear-gradient(180deg, rgba(8, 9, 14, 0.90) 0%, rgba(8, 9, 14, 0.84) 100%);
+      box-shadow: 0 30px 90px -40px rgba(0,0,0,0.85);
+      transform: translateZ(0);
+      will-change: transform, opacity;
+    }
+    .settings-overlay.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0) translateZ(0);
+      transition:
+        opacity 280ms var(--ease),
+        transform 320ms var(--ease),
+        visibility 0s linear 0s;
+    }
+    .settings-overlay.is-closing {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(10px) translateZ(0);
+      transition:
+        opacity 160ms var(--ease),
+        transform 220ms var(--ease),
+        visibility 0s linear 220ms;
+    }
+    .settings-overlay.is-open .settings-overlay-backdrop,
+    .settings-overlay.is-closing .settings-overlay-backdrop {
+      opacity: 1;
+    }
+
+    .settings-overlay-header,
+    .settings-overlay-body,
+    .settings-overlay-footer {
+      transform: translateY(6px);
+      opacity: 0;
+      transition: transform 320ms var(--ease), opacity 260ms var(--ease);
+    }
+    .settings-overlay.is-open .settings-overlay-header,
+    .settings-overlay.is-open .settings-overlay-body,
+    .settings-overlay.is-open .settings-overlay-footer {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .settings-overlay.is-open .settings-overlay-header { transition-delay: 30ms; }
+    .settings-overlay.is-open .settings-overlay-body { transition-delay: 55ms; }
+    .settings-overlay.is-open .settings-overlay-footer { transition-delay: 80ms; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .settings-overlay,
+      .settings-overlay-backdrop,
+      .settings-overlay-content,
+      .settings-overlay-header,
+      .settings-overlay-body,
+      .settings-overlay-footer {
+        transition: none !important;
+        transform: none !important;
+      }
+    }
     .settings-overlay-header {
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: var(--space-5) var(--space-6);
-      border-bottom: 1px solid var(--border);
-      background: var(--surface);
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(13, 15, 20, 0.78);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 3;
     }
+    .settings-overlay-header::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 55%);
+      opacity: 0.9;
+    }
+    .settings-overlay-header > * { position: relative; z-index: 1; }
     .settings-overlay-title {
       font-size: var(--type-section-title);
       font-weight: var(--font-weight-bold);
       letter-spacing: -0.025em;
       color: var(--text);
     }
+    .settings-overlay-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .settings-overlay-title::before {
+      content: "";
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18) 0%, transparent 55%),
+        linear-gradient(135deg, rgba(139, 92, 246, 0.32) 0%, rgba(99, 102, 241, 0.18) 45%, rgba(255,255,255,0.08) 100%);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06);
+    }
     .settings-overlay-close {
       height: 36px;
-      padding: 0 var(--space-4);
-      font-size: var(--type-body);
-      font-weight: var(--font-weight-semibold);
-      color: var(--accent-hover);
-      background: var(--accent-muted);
-      border: 1px solid rgba(124, 58, 237, 0.3);
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: rgba(248,249,252,0.92);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
       border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: background 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
+      transition: transform 0.16s var(--ease), background 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
     }
     .settings-overlay-close:hover {
-      background: rgba(124, 58, 237, 0.22);
-      border-color: var(--accent);
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(139, 92, 246, 0.45);
+      transform: translateY(-1px);
       color: var(--text);
     }
+    .settings-overlay-close:active { transform: translateY(0px) scale(0.98); }
     .settings-overlay-body {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      padding: var(--space-5) var(--space-6) var(--space-6);
+      padding: 16px 18px 18px;
+      scroll-behavior: smooth;
+      overscroll-behavior: contain;
     }
     .settings-overlay-body::-webkit-scrollbar { width: 6px; }
     .settings-overlay-body::-webkit-scrollbar-track { background: transparent; }
@@ -2304,12 +2434,22 @@
     .settings-overlay-section:last-child {
       margin-bottom: 0;
     }
+    .settings-overlay-section + .settings-overlay-section {
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
     .settings-overlay-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(13, 15, 20, 0.92) 0%, rgba(13, 15, 20, 0.78) 100%);
+      border: 1px solid rgba(255,255,255,0.075);
       border-radius: var(--radius);
       padding: var(--space-4);
-      box-shadow: 0 1px 0 0 rgba(255,255,255,0.02);
+      box-shadow: 0 14px 40px -18px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.03);
+      transition: transform 0.22s var(--ease), border-color 0.22s var(--ease), box-shadow 0.22s var(--ease);
+    }
+    .settings-overlay-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(139, 92, 246, 0.22);
+      box-shadow: 0 18px 52px -22px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.04);
     }
     .settings-overlay-section-title {
       font-size: var(--type-caption);
@@ -2327,6 +2467,16 @@
       margin-bottom: var(--space-3);
       line-height: 1.4;
     }
+
+    /* Premium micro-interactions for Settings buttons */
+    .settings-overlay .lang-btn,
+    .settings-overlay .bg-btn {
+      transition: transform 0.16s var(--ease), background 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
+    }
+    .settings-overlay .lang-btn:hover,
+    .settings-overlay .bg-btn:hover { transform: translateY(-1px); }
+    .settings-overlay .lang-btn:active,
+    .settings-overlay .bg-btn:active { transform: translateY(0px) scale(0.99); }
     .settings-overlay .settings-grid {
       margin-bottom: 0;
       gap: var(--space-4);
@@ -2397,25 +2547,22 @@
       80% { transform: translateX(2px); }
     }
 
-    /* Login gate: full-screen overlay when user is not logged in (last child so it paints on top) */
+    /* Login gate: overlay when not logged in; hidden when .main-wrapper.logged-in */
     .login-gate {
       position: absolute;
       inset: 0;
       z-index: 9999;
-      display: flex !important;
-      align-items: center;
-      justify-content: center;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
       background: var(--bg);
-      background-image: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(124, 58, 237, 0.08) 0%, transparent 50%);
-      padding: var(--space-6);
+      padding: var(--space-4);
       box-sizing: border-box;
-      pointer-events: auto;
     }
-    /* Only hide the gate when user is logged in */
-    .main-wrapper.logged-in .login-gate { display: none !important; pointer-events: none; }
+    .main-wrapper.logged-in .login-gate { display: none !important; }
     .main-wrapper:not(.logged-in) #appContent { display: none !important; }
     .main-wrapper:not(.logged-in) .dashboard-wrapper { display: none !important; }
-    .main-wrapper:not(.logged-in) #settingsOverlay { display: none !important; }
+    .main-wrapper:not(.logged-in) .settings-overlay { display: none !important; }
     #appContent {
       flex: 1;
       display: flex;
@@ -2424,102 +2571,25 @@
       position: relative;
       z-index: 1;
     }
-    .login-gate-inner {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
+    .login-gate__bar {
+      flex-shrink: 0;
+      padding: 12px 16px;
+      margin: 0 0 var(--space-2);
+      font-size: var(--type-panel-title);
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      background: rgba(255,255,255,0.06);
+      border-radius: var(--radius-sm);
     }
-    .login-gate-iframe {
+    .login-gate__iframe {
       flex: 1;
-      width: 100%;
       min-height: 0;
+      width: 100%;
       border: none;
       border-radius: var(--radius);
       background: var(--surface);
-      box-shadow: 0 0 0 1px var(--border), 0 8px 24px -8px rgba(0, 0, 0, 0.35);
     }
-    .login-gate-logo {
-      width: auto;
-      height: 48px;
-      margin-bottom: var(--space-6);
-      object-fit: contain;
-    }
-    .login-gate-text {
-      font-size: var(--type-panel-title);
-      font-weight: var(--font-weight-bold);
-      color: var(--text);
-      margin: 0 0 var(--space-1);
-      line-height: 1.35;
-    }
-    .login-gate-sub {
-      font-size: var(--type-metadata);
-      color: var(--text-tertiary);
-      margin: 0 0 var(--space-4);
-      line-height: 1.35;
-    }
-    .login-gate .field {
-      text-align: left;
-      margin-bottom: var(--space-4);
-    }
-    .login-gate .field input {
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .login-gate-btn {
-      width: 100%;
-      padding: var(--space-4) var(--space-6);
-      font-size: var(--type-product-name);
-      font-weight: var(--font-weight-bold);
-      color: #fff;
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: background 0.2s var(--ease), transform 0.1s var(--ease-out);
-    }
-    .login-gate-btn:hover {
-      background: var(--accent-hover);
-      transform: scale(1.02);
-    }
-    .login-gate-options {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
-      width: 100%;
-    }
-    .login-gate-btn-option {
-      width: 100%;
-      padding: var(--space-3) var(--space-4);
-      font-size: var(--type-body);
-      font-weight: var(--font-weight-semibold);
-      color: var(--text);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: background 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.1s var(--ease-out);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--space-2);
-    }
-    .login-gate-btn-option:hover {
-      background: var(--surface-elevated);
-      border-color: var(--border-strong);
-      transform: scale(1.01);
-    }
-    .login-gate-btn-option.login-gate-btn-email {
-      margin-top: var(--space-2);
-      background: var(--accent);
-      border-color: transparent;
-      color: #fff;
-    }
-    .login-gate-btn-option.login-gate-btn-email:hover {
-      background: var(--accent-hover);
-    }
-
     .product-item.loading { cursor: default; pointer-events: none; }
     .product-item.loading .remove-btn { pointer-events: auto; opacity: 0.6; }
     .skeleton-img {
@@ -2609,6 +2679,8 @@
     </footer>
 
     <div class="settings-overlay" id="settingsOverlay" aria-hidden="true">
+      <div class="settings-overlay-backdrop" aria-hidden="true"></div>
+      <div class="settings-overlay-content">
       <div class="settings-overlay-header">
         <span class="settings-overlay-title" data-i18n="settings">Settings</span>
         <button type="button" class="settings-overlay-close" id="settingsClose" aria-label="Close settings" data-i18n="done" data-i18n-aria="closeSettings">Done</button>
@@ -2622,6 +2694,7 @@
             <div class="account-actions">
               <button type="button" id="loginBtn" class="lang-btn" style="min-width: 100%;" data-i18n="login">Log in</button>
               <button type="button" id="logoutBtn" class="lang-btn" style="min-width: 100%; display: none;" data-i18n="logOut">Log out</button>
+              <button type="button" id="upgradeBtn" class="lang-btn" style="min-width: 100%; display: none; margin-top: 8px;" data-i18n="upgradeToPro">Upgrade to Pro</button>
             </div>
           </div>
         </div>
@@ -2670,11 +2743,10 @@
       </div>
     </div>
     </div>
-
-    <div class="login-gate" id="loginGate">
-      <div class="login-gate-inner">
-        <iframe id="loginGateFrame" class="login-gate-iframe" title="Sign in to ReStock Pro" src="https://getrestock.app/auth?from_extension=1"></iframe>
-      </div>
+    </div>
+    <div class="login-gate" id="loginGate" aria-label="Sign in to ReStock Pro">
+      <p class="login-gate__bar" id="loginGateBar">Sign in to use ReStock Pro</p>
+      <iframe id="loginGateFrame" class="login-gate__iframe" title="Sign in" src="https://getrestock.app/auth?from_extension=1"></iframe>
     </div>
   </div>
   <script src="popup.js"></script>

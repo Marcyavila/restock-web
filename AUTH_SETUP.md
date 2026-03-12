@@ -24,9 +24,9 @@ This guide gets you from zero to login + free/Pro limits in the extension and on
 ## 2. Clerk auth
 
 1. **Sign up at [clerk.com](https://clerk.com)** and create an application (e.g. “ReStock Pro”).
-2. **Enable the Convex integration** in Clerk: Dashboard → Integrations → Convex. Copy your **Clerk Frontend API URL** (e.g. `https://xxx.clerk.accounts.dev`).
+2. **Enable the Convex integration** in Clerk: Dashboard → Integrations → Convex. Copy your **Clerk Frontend API URL** (e.g. `https://viable-teal-46.clerk.accounts.dev`).
 3. **In Convex Dashboard** (Settings → Environment Variables), add:
-   - `CLERK_JWT_ISSUER_DOMAIN` = your Clerk Frontend API URL (e.g. `https://xxx.clerk.accounts.dev`)
+   - `CLERK_JWT_ISSUER_DOMAIN` = your Clerk Frontend API URL (e.g. `https://viable-teal-46.clerk.accounts.dev`)
 4. Redeploy Convex so auth is applied:
    ```bash
    npx convex dev
@@ -38,6 +38,16 @@ This guide gets you from zero to login + free/Pro limits in the extension and on
 6. **Force Google/Discord to show account picker** so users always choose an account (no silent sign-in):
    - Clerk Dashboard → **User & Authentication** → **Social connections** → **Google**. Look for **Authorization parameters**, **Custom parameters**, or **Always show account selector**. Add `prompt=select_account` (e.g. in "Additional authorization parameters") so Google shows "Choose an account" every time.
    - For **Discord**, if a similar option exists, enable it so users can pick which Discord account to use.
+
+7. **Clerk "frame-ancestors" (embedding / iframe)**  
+   If the extension shows the auth page in an iframe and you see a CSP error like "Framing 'https://xxx.accounts.dev/' violates… frame-ancestors", add your origins in Clerk so Clerk's UI can be embedded:
+   - In **Clerk Dashboard** → **Configure** → **Paths** (or **Domains** / **Security**), find the setting for **allowed frame ancestors** or **domains that can embed Clerk**.
+   - Add: `https://getrestock.app`, `https://www.getrestock.app`. If the login iframe is loaded from the extension popup, also add your extension origin, e.g. `chrome-extension://YOUR_EXTENSION_ID` (ID from `chrome://extensions`).
+
+8. **Convex 401 on `/getPlan`**  
+   If the extension gets 401 from Convex after sign-in, ensure Convex has the correct Clerk issuer:
+   - Convex Dashboard → **Settings** → **Environment Variables** → `CLERK_JWT_ISSUER_DOMAIN` = your Clerk Frontend API URL (e.g. `https://viable-teal-46.clerk.accounts.dev`), with no trailing slash.
+   - Redeploy Convex after changing env vars.
 
 ---
 
@@ -91,27 +101,35 @@ The extension expects to open a URL like `https://getrestock.app/auth` (or `/aut
 
 ---
 
-## 5. Stripe (Pro tier)
+## 5. Stripe (Pro tier) — live payments
 
-1. **Stripe account**  
-   Create products/prices (e.g. “ReStock Pro” monthly or yearly) in the Stripe Dashboard.
+Checkout is implemented: the extension and the site call Convex to create a Stripe Checkout Session, then Stripe webhooks update the user’s plan in Convex.
 
-2. **Checkout**  
-   When a user clicks “Upgrade”:
-   - Create a Stripe Customer (or reuse by email).
-   - Create a Checkout Session with that `customer` (and `client_reference_id` or metadata if you store Convex userId).
-   - Before or after checkout, ensure the Convex profile has `stripeCustomerId` (e.g. call `profiles.setStripeCustomerId` when you create the customer).
+1. **Stripe account & product**  
+   - Sign up at [stripe.com](https://stripe.com) and complete account setup.
+   - In Stripe Dashboard → **Product catalog** → **Add product** (e.g. “ReStock Pro”).
+   - Add a **recurring** price (e.g. monthly or yearly) and copy the **Price ID** (starts with `price_`).
 
-3. **Webhook**  
-   In Stripe, add an endpoint pointing to:
-   `https://YOUR_DEPLOYMENT.convex.site/stripe-webhook`  
-   Use the same HTTP router you deployed (Convex HTTP action). In Convex Dashboard, set:
-   - `STRIPE_WEBHOOK_SECRET` = the webhook signing secret from Stripe.
+2. **Convex environment variables**  
+   In Convex Dashboard → your project → **Settings** → **Environment Variables**, add:
+   - `STRIPE_SECRET_KEY` = your Stripe secret key (Stripe Dashboard → Developers → API keys → Secret key; use test key for testing).
+   - `STRIPE_PRICE_ID` = the Price ID from step 1 (e.g. `price_1ABC...`).
+   - `STRIPE_WEBHOOK_SECRET` = from step 3 below (webhook signing secret).
 
-   The current webhook handler parses `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, and `invoice.paid`, and calls `setPlanFromStripe` with the Stripe customer ID. **Important:** In production you must verify the Stripe signature (e.g. with `stripe.webhooks.constructEvent`) before updating plan; the handler in `convex/http.ts` is a starting point and should be updated to verify the signature using your `STRIPE_WEBHOOK_SECRET`.
+3. **Stripe webhook**  
+   - Stripe Dashboard → **Developers** → **Webhooks** → **Add endpoint**.
+   - **Endpoint URL:** `https://YOUR_DEPLOYMENT.convex.site/stripe-webhook`  
+     (use your Convex HTTP URL from Convex Dashboard → Settings → URL).
+   - **Events to send:**  
+     `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`.
+   - After creating the endpoint, open it and reveal **Signing secret** (starts with `whsec_`). Set that as `STRIPE_WEBHOOK_SECRET` in Convex (step 2).
+   - Redeploy Convex after changing env vars.
 
-4. **Customer ID**  
-   Your Convex `profiles` table has `stripeCustomerId`. When you create a Stripe Customer during checkout, save it with `profiles.setStripeCustomerId` so the webhook can find the profile and set `plan: "pro"` or `plan: "free"`.
+4. **Flow**  
+   - User clicks “Upgrade to Pro” in the extension (or on getrestock.app/upgrade).  
+   - If logged in, the app calls Convex `GET /createCheckoutSession` with the Clerk JWT; Convex creates a Stripe Checkout Session and returns the URL; the user is sent to Stripe to pay.  
+   - After payment, Stripe sends `checkout.session.completed` (and subscription events) to your webhook. The handler verifies the signature and updates the Convex profile (links `stripeCustomerId`, sets `plan: "pro"`).  
+   - The extension’s `/getPlan` (and next open) will show Pro.
 
 ---
 

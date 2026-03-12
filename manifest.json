@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ReStock Pro",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "author": "Marcy Avila",
   "description": "Monitor product availability and receive alerts when monitored items restock.",
   "permissions": [

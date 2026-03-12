@@ -16,7 +16,24 @@ let _lastDeferSchedule = 0;
 const _DEFER_SCHEDULE_THROTTLE_MS = 120;
 
 /** Production Convex HTTP URL — users never see or set this. Replace with your deployment from Convex Dashboard → Settings → URL. */
-const CONVEX_HTTP_URL = "https://vibrant-gopher-82.convex.site";
+const CONVEX_HTTP_URL = "https://unique-ptarmigan-750.convex.site";
+
+/** Auth page URL (used when opening sign-in in a new tab). Must match iframe src origin for postMessage. */
+const AUTH_URL = "https://getrestock.app/auth?from_extension=1";
+
+/** Where to send users to upgrade to Pro (Stripe Checkout, /upgrade page, etc.). */
+const UPGRADE_URL = "https://getrestock.app/upgrade";
+
+/** Placeholder image data URL when product image is missing or not loaded (Heroicons "photo" shape). */
+const NOT_LIVE_PLACEHOLDER_IMG =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">' +
+    '<rect width="100" height="100" fill="#151b26" rx="10"/>' +
+    '<g transform="translate(50,50) scale(3.6) translate(-12,-12)" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M2.25 15.75L7.40901 10.591C8.28769 9.71231 9.71231 9.71231 10.591 10.591L15.75 15.75M14.25 14.25L15.659 12.841C16.5377 11.9623 17.9623 11.9623 18.841 12.841L21.75 15.75M3.75 19.5H20.25C21.0784 19.5 21.75 18.8284 21.75 18V6C21.75 5.17157 21.0784 4.5 20.25 4.5H3.75C2.92157 4.5 2.25 5.17157 2.25 6V18C2.25 18.8284 2.92157 19.5 3.75 19.5ZM14.25 8.25H14.2575V8.2575H14.25V8.25ZM14.625 8.25C14.625 8.45711 14.4571 8.625 14.25 8.625C14.0429 8.625 13.875 8.45711 13.875 8.25C13.875 8.04289 14.0429 7.875 14.25 7.875C14.4571 7.875 14.625 8.04289 14.625 8.25Z"/>' +
+    '</g></svg>'
+  );
 
 /** Language: default English; Spanish optional in settings. */
 const TRANSLATIONS = {
@@ -80,7 +97,7 @@ const TRANSLATIONS = {
     actions: "Actions",
     paused: "Paused",
     notLive: "Not live",
-    productUnavailable: "Unavailable (re-add from product page)",
+    productUnavailable: "Unavailable",
     outOfStock: "Out of stock",
     inStock: "In stock",
     notMonitored: "Not monitored",
@@ -107,16 +124,17 @@ const TRANSLATIONS = {
     nextScanInS: "Next scan in {n}s",
     account: "Account",
     accountDesc: "Log in to sync your plan and unlock Pro.",
-    loginGateTitle: "Log in to use ReStock Pro",
-    loginGateSub: "Sign in or create an account",
     continueWithGoogle: "Continue with Google",
     continueWithDiscord: "Continue with Discord",
     signInWithEmail: "Sign in with email",
     login: "Log in",
     logOut: "Log out",
+    reconnect: "Reconnect",
+    sessionExpiredReconnect: "Session expired — reconnect to sync plan.",
     planFree: "Free",
     planPro: "Pro",
-    upgradeHint: "Upgrade to Pro for more items."
+    upgradeHint: "Upgrade to Pro for more items.",
+    upgradeToPro: "Upgrade to Pro"
   },
   es: {
     ready: "Listo",
@@ -178,7 +196,7 @@ const TRANSLATIONS = {
     actions: "Acciones",
     paused: "En pausa",
     notLive: "Fuera de línea",
-    productUnavailable: "No disponible (agrégalo de nuevo desde la página)",
+    productUnavailable: "No disponible",
     outOfStock: "Agotado",
     inStock: "En stock",
     notMonitored: "Sin seguimiento",
@@ -205,20 +223,49 @@ const TRANSLATIONS = {
     nextScanInS: "Próximo escaneo en {n}s",
     account: "Cuenta",
     accountDesc: "Inicia sesión para sincronizar tu plan y desbloquear Pro.",
-    loginGateTitle: "Inicia sesión para usar ReStock Pro",
-    loginGateSub: "Inicia sesión o crea una cuenta",
     continueWithGoogle: "Continuar con Google",
     continueWithDiscord: "Continuar con Discord",
     signInWithEmail: "Iniciar sesión con correo",
     login: "Iniciar sesión",
     logOut: "Cerrar sesión",
+    reconnect: "Reconectar",
+    sessionExpiredReconnect: "Sesión caducada — reconecta para sincronizar tu plan.",
     planFree: "Gratis",
     planPro: "Pro",
-    upgradeHint: "Actualiza a Pro para más productos."
+    upgradeHint: "Actualiza a Pro para más productos.",
+    upgradeToPro: "Actualizar a Pro"
   }
 };
 
 let userPlan = null;
+
+/** Call background for statuses; never throws—returns {} if popup/connection closes. */
+function getStatusesFromBg() {
+  return new Promise(function (resolve) {
+    try {
+      chrome.runtime.sendMessage({ action: "getStatuses" }, function (res) {
+        resolve(res != null ? res : {});
+      });
+    } catch (_) {
+      resolve({});
+    }
+  }).catch(function () { return {}; });
+}
+
+/** POST user's language preference to Convex (when logged in). */
+async function setLocaleOnServer(locale) {
+  const { authToken } = await chrome.storage.local.get(["authToken"]);
+  if (!authToken) return;
+  const base = (typeof CONVEX_HTTP_URL !== "undefined" ? CONVEX_HTTP_URL : "").replace(/\/$/, "");
+  if (!base) return;
+  try {
+    await fetch(base + "/setLocale", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + authToken },
+      body: JSON.stringify({ locale: locale === "es" ? "es" : "en" }),
+    });
+  } catch (_) {}
+}
 
 async function fetchUserPlan() {
   const { authToken } = await chrome.storage.local.get(["authToken"]);
@@ -235,12 +282,22 @@ async function fetchUserPlan() {
   try {
     const res = await fetch(url, { headers: { Authorization: `Bearer ${authToken}` } });
     if (!res.ok) {
-      if (res.status === 401) chrome.storage.local.remove("authToken");
+      if (res.status === 401) {
+        // Token likely expired; don't log the user out automatically.
+        // Keep authToken so the UI stays logged in, and ask user to reconnect.
+        chrome.storage.local.set({ authNeedsRefresh: true }).catch(() => {});
+      }
       userPlan = null;
       return null;
     }
     const data = await res.json();
     userPlan = data;
+    chrome.storage.local.set({ authNeedsRefresh: false }).catch(() => {});
+    if (data.locale === "es" || data.locale === "en") {
+      currentLocale = data.locale;
+      chrome.storage.local.set({ locale: data.locale }).catch(function () {});
+      if (typeof applyLocale === "function") applyLocale(data.locale);
+    }
     return data;
   } catch (_) {
     userPlan = null;
@@ -252,15 +309,27 @@ function updateAccountUI() {
   const statusEl = document.getElementById("accountStatus");
   const loginBtn = document.getElementById("loginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
+  const upgradeBtn = document.getElementById("upgradeBtn");
   if (!statusEl || !loginBtn || !logoutBtn) return;
   if (userPlan) {
     statusEl.textContent = (userPlan.plan === "pro" ? t("planPro") : t("planFree")) + (userPlan.email ? " · " + userPlan.email : "");
     loginBtn.style.display = "none";
     logoutBtn.style.display = "block";
+    if (upgradeBtn) {
+      upgradeBtn.style.display = userPlan.plan === "free" ? "block" : "none";
+      upgradeBtn.textContent = t("upgradeToPro");
+    }
   } else {
-    statusEl.textContent = t("accountDesc");
-    loginBtn.style.display = "block";
-    logoutBtn.style.display = "none";
+    // If we still have an authToken but plan fetch failed (likely 401), show reconnect.
+    chrome.storage.local.get(["authToken", "authNeedsRefresh"], (data) => {
+      const hasToken = !!data.authToken;
+      const needs = data.authNeedsRefresh === true;
+      statusEl.textContent = hasToken && needs ? t("sessionExpiredReconnect") : t("accountDesc");
+      loginBtn.textContent = hasToken && needs ? t("reconnect") : t("login");
+      loginBtn.style.display = "block";
+      logoutBtn.style.display = hasToken ? "block" : "none";
+    });
+    if (upgradeBtn) upgradeBtn.style.display = "none";
   }
 }
 
@@ -570,6 +639,13 @@ function setBgStyle(value) {
   }
 
   document.addEventListener("DOMContentLoaded", async () => {
+  const mainWrapper = document.getElementById("mainWrapper");
+  function setLoggedIn(hasToken) {
+    if (!mainWrapper) return;
+    if (hasToken) mainWrapper.classList.add("logged-in");
+    else mainWrapper.classList.remove("logged-in");
+  }
+  try {
   var search = window.location.search || "";
   var params = new URLSearchParams(search);
   var hasStandaloneParam = search.indexOf("standalone=true") !== -1 || params.get("standalone") === "true" || params.get("standalone") === "1";
@@ -581,13 +657,6 @@ function setBgStyle(value) {
   currentLocale = storedLocale === "es" ? "es" : "en";
   initBgLayers();
 
-  const mainWrapper = document.getElementById("mainWrapper");
-  function setLoggedIn(hasToken) {
-    if (!mainWrapper) return;
-    if (hasToken) mainWrapper.classList.add("logged-in");
-    else mainWrapper.classList.remove("logged-in");
-  }
-  // Listen for token changes immediately (e.g. from callback tab/iframe) so we never miss an update
   chrome.storage.onChanged.addListener(function authTokenListener(changes, areaName) {
     if (areaName === "local" && changes.authToken) {
       const hasToken = !!changes.authToken.newValue;
@@ -599,18 +668,34 @@ function setBgStyle(value) {
   const { authToken } = await chrome.storage.local.get(["authToken"]);
   setLoggedIn(!!authToken);
 
-  function initLoginGate() {
+  function initAuthMessages() {
     window.addEventListener("message", function (event) {
       if (event.origin !== "https://getrestock.app" && event.origin !== "https://www.getrestock.app") return;
       if (event.data && event.data.type === "AUTH_CALLBACK" && event.data.token) {
-        chrome.storage.local.set({ authToken: event.data.token }, () => {
+        chrome.storage.local.set({ authToken: event.data.token, authNeedsRefresh: false }, () => {
           setLoggedIn(true);
           fetchUserPlan().then(updateAccountUI);
+        });
+        return;
+      }
+      if (event.data && event.data.type === "RESTOCK_AUTH_SUCCESS") {
+        chrome.storage.local.get(["authToken"], (data) => {
+          if (data.authToken) {
+            chrome.storage.local.set({ authNeedsRefresh: false }).catch(() => {});
+            setLoggedIn(true);
+            fetchUserPlan().then(updateAccountUI);
+          }
         });
       }
     });
   }
-  initLoginGate();
+  initAuthMessages();
+
+  var loginGateFrame = document.getElementById("loginGateFrame");
+  var loginGateBar = document.getElementById("loginGateBar");
+  if (loginGateFrame && loginGateBar) {
+    loginGateFrame.addEventListener("load", function () { loginGateBar.style.display = "none"; });
+  }
 
   if (document.body.classList.contains("standalone-mode")) {
     const mainWrapper = document.getElementById("mainWrapper");
@@ -681,13 +766,12 @@ function setBgStyle(value) {
       dashboardWrapper.appendChild(dashboardSidebar);
       dashboardWrapper.appendChild(dashboardCanvas);
       bottomBar.classList.add("dashboard-action-zone");
-      /* countdown progress bar is already in popup.html inside #monitorContainer */
       const bgLayers = mainWrapper.querySelector(".bg-layers");
       const loginGate = document.getElementById("loginGate");
       while (mainWrapper.firstChild) mainWrapper.removeChild(mainWrapper.firstChild);
       if (bgLayers) mainWrapper.appendChild(bgLayers);
-      if (loginGate) mainWrapper.appendChild(loginGate);
       mainWrapper.appendChild(dashboardWrapper);
+      if (loginGate) mainWrapper.appendChild(loginGate);
       if (settingsOverlay) mainWrapper.appendChild(settingsOverlay);
     }
   }
@@ -711,16 +795,33 @@ function setBgStyle(value) {
   const settingsOverlay = document.getElementById("settingsOverlay");
   const settingsTrigger = document.getElementById("settingsTrigger");
   const settingsClose = document.getElementById("settingsClose");
+  let settingsCloseTimer = null;
   function openSettings() {
     if (settingsOverlay) {
-      settingsOverlay.classList.add("is-open");
+      if (settingsCloseTimer) {
+        window.clearTimeout(settingsCloseTimer);
+        settingsCloseTimer = null;
+      }
+      settingsOverlay.classList.remove("is-closing");
       settingsOverlay.setAttribute("aria-hidden", "false");
+      // Add class on next frame to avoid a flash on some machines (blur + reflow)
+      window.requestAnimationFrame(() => {
+        settingsOverlay.classList.add("is-open");
+      });
     }
   }
   function closeSettings() {
     if (settingsOverlay) {
+      if (!settingsOverlay.classList.contains("is-open")) return;
+      settingsOverlay.classList.add("is-closing");
       settingsOverlay.classList.remove("is-open");
-      settingsOverlay.setAttribute("aria-hidden", "true");
+      // Wait for the exit transition before marking hidden
+      if (settingsCloseTimer) window.clearTimeout(settingsCloseTimer);
+      settingsCloseTimer = window.setTimeout(() => {
+        settingsOverlay.setAttribute("aria-hidden", "true");
+        settingsOverlay.classList.remove("is-closing");
+        settingsCloseTimer = null;
+      }, 240);
     }
   }
   if (settingsTrigger) settingsTrigger.addEventListener("click", () => {
@@ -738,10 +839,28 @@ function setBgStyle(value) {
     chrome.runtime.sendMessage({ action: "stop" });
     await chrome.storage.local.set({ isRunning: false });
     await chrome.storage.local.remove("authToken");
+    await chrome.storage.local.set({ authNeedsRefresh: false });
     userPlan = null;
-    setLoggedIn(false);
     updateAccountUI();
     chrome.tabs.create({ url: "https://getrestock.app/auth/logout" });
+  });
+  const upgradeBtn = document.getElementById("upgradeBtn");
+  if (upgradeBtn) upgradeBtn.addEventListener("click", async () => {
+    const { authToken } = await chrome.storage.local.get(["authToken"]);
+    if (authToken) {
+      try {
+        const res = await fetch(CONVEX_HTTP_URL + "/createCheckoutSession", {
+          method: "GET",
+          headers: { Authorization: "Bearer " + authToken },
+        });
+        const data = res.ok ? await res.json().catch(() => ({})) : null;
+        if (data?.url) {
+          chrome.tabs.create({ url: data.url });
+          return;
+        }
+      } catch (_) {}
+    }
+    chrome.tabs.create({ url: UPGRADE_URL });
   });
 
   fetchUserPlan().then(updateAccountUI);
@@ -821,6 +940,7 @@ function setBgStyle(value) {
       if (lang !== currentLocale) {
         currentLocale = lang === "es" ? "es" : "en";
         await chrome.storage.local.set({ locale: currentLocale });
+        setLocaleOnServer(currentLocale);
         applyLocale(currentLocale);
         const d = await chrome.storage.local.get(["tcins", "productDetails", "stockStatuses", "isRunning", "lastCheckTime", "interval", "lastScanMs", "lastPingMs"]);
         const tcins = (d.tcins || []).filter(isValidListId);
@@ -1074,7 +1194,7 @@ function setBgStyle(value) {
     document.getElementById("status").innerHTML = "<span class=\"dot dot-checking\"></span> " + t("checking") + "…";
     document.getElementById("countdown").innerHTML = t("scanning") + " <span class=\"scan-dots\"><span>.</span><span>.</span><span>.</span></span>";
     chrome.runtime.sendMessage({ action: "checkNow", tcins: updated });
-    const statuses = (await new Promise(r => chrome.runtime.sendMessage({ action: "getStatuses" }, r)))?.statuses || {};
+    const statuses = (await getStatusesFromBg()).statuses || {};
     await renderProductList(updated, data.productDetails || {}, statuses);
     updateToggleButtonState(updated);
     if (document.body.classList.contains("standalone-mode")) {
@@ -1293,16 +1413,16 @@ function setBgStyle(value) {
       }
       await chrome.storage.local.set({ tcins: merged, productDetails });
       const details = (await chrome.storage.local.get(["productDetails"])).productDetails || {};
-      const statuses = (await new Promise(r => chrome.runtime.sendMessage({ action: "getStatuses" }, r)))?.statuses || {};
+      const statuses = (await getStatusesFromBg()).statuses || {};
       await renderProductList(merged, details, statuses);
       updateToggleButtonState(merged);
       showToast(t("importedCount", { n: added.length }), "success");
       e.target.value = "";
     });
   }
-});
+  } catch (e) {}
 
-function showToast(message, type = "info") {
+  function showToast(message, type = "info") {
   const container = document.getElementById("toastContainer");
   if (!container) return;
   const toast = document.createElement("div");
@@ -1352,18 +1472,6 @@ function updatePulseNextScan(text) {
     }
   }
 }
-
-/** Data URL for placeholder when image is missing or item is not live (image icon). */
-/** Placeholder image: Heroicons "photo" (MIT) on dark panel — https://heroicons.com */
-const NOT_LIVE_PLACEHOLDER_IMG =
-  "data:image/svg+xml," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">' +
-    '<rect width="100" height="100" fill="#151b26" rx="10"/>' +
-    '<g transform="translate(50,50) scale(3.6) translate(-12,-12)" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
-    '<path d="M2.25 15.75L7.40901 10.591C8.28769 9.71231 9.71231 9.71231 10.591 10.591L15.75 15.75M14.25 14.25L15.659 12.841C16.5377 11.9623 17.9623 11.9623 18.841 12.841L21.75 15.75M3.75 19.5H20.25C21.0784 19.5 21.75 18.8284 21.75 18V6C21.75 5.17157 21.0784 4.5 20.25 4.5H3.75C2.92157 4.5 2.25 5.17157 2.25 6V18C2.25 18.8284 2.92157 19.5 3.75 19.5ZM14.25 8.25H14.2575V8.2575H14.25V8.25ZM14.625 8.25C14.625 8.45711 14.4571 8.625 14.25 8.625C14.0429 8.625 13.875 8.45711 13.875 8.25C13.875 8.04289 14.0429 7.875 14.25 7.875C14.4571 7.875 14.625 8.04289 14.625 8.25Z"/>' +
-    '</g></svg>'
-  );
 
 /** If the image fails to load (e.g. 404), show the placeholder. Works with CSP (no inline onerror). */
 function setImagePlaceholderOnError(img) {
@@ -1441,7 +1549,7 @@ async function renderProductList(tcins, details, statuses = {}) {
       return sortDir === 1 ? cmp : -cmp;
     });
     if (Object.keys(statuses).length === 0) {
-      const res = await new Promise(r => chrome.runtime.sendMessage({ action: "getStatuses" }, r));
+      const res = await getStatusesFromBg();
       statuses = res?.statuses || {};
     }
     const existingRows = container.querySelectorAll(".product-item.dashboard-row");
@@ -1493,7 +1601,7 @@ async function renderProductList(tcins, details, statuses = {}) {
                 let paused = (d.pausedTCINs || []).filter(id => id !== tcin);
                 await chrome.storage.local.set({ tcins: filtered, pausedTCINs: paused });
                 const details2 = (await chrome.storage.local.get(["productDetails"])).productDetails || {};
-                const statuses2 = (await new Promise(r => chrome.runtime.sendMessage({ action: "getStatuses" }, r)))?.statuses || {};
+                const statuses2 = (await getStatusesFromBg()).statuses || {};
                 await renderProductList(filtered, details2, statuses2);
                 updateToggleButtonState(filtered);
                 if (isStandalone) showToast(t("itemRemoved"), "info");
@@ -1509,7 +1617,7 @@ async function renderProductList(tcins, details, statuses = {}) {
               let paused = (d.pausedTCINs || []).filter(id => id !== tcin);
               await chrome.storage.local.set({ tcins: filtered, pausedTCINs: paused });
               const details2 = (await chrome.storage.local.get(["productDetails"])).productDetails || {};
-              const statuses2 = (await new Promise(r => chrome.runtime.sendMessage({ action: "getStatuses" }, r))).statuses || {};
+              const statuses2 = (await getStatusesFromBg()).statuses || {};
               await renderProductList(filtered, details2, statuses2);
               updateToggleButtonState(filtered);
               if (isStandalone) showToast(t("itemRemoved"), "info");
@@ -1611,7 +1719,7 @@ async function renderProductList(tcins, details, statuses = {}) {
             let paused = (d.pausedTCINs || []).filter(id => id !== tcin);
             await chrome.storage.local.set({ tcins: filtered, pausedTCINs: paused });
             const details2 = (await chrome.storage.local.get(["productDetails"])).productDetails || {};
-            const statuses2 = (await new Promise(r => chrome.runtime.sendMessage({ action: "getStatuses" }, r)))?.statuses || {};
+            const statuses2 = (await getStatusesFromBg()).statuses || {};
             await renderProductList(filtered, details2, statuses2);
             updateToggleButtonState(filtered);
             if (isStandalone) showToast(t("itemRemoved"), "info");
@@ -1627,7 +1735,7 @@ async function renderProductList(tcins, details, statuses = {}) {
           let paused = (d.pausedTCINs || []).filter(id => id !== tcin);
           await chrome.storage.local.set({ tcins: filtered, pausedTCINs: paused });
           const details2 = (await chrome.storage.local.get(["productDetails"])).productDetails || {};
-          const statuses2 = (await new Promise(r => chrome.runtime.sendMessage({ action: "getStatuses" }, r))).statuses || {};
+          const statuses2 = (await getStatusesFromBg()).statuses || {};
           await renderProductList(filtered, details2, statuses2);
           updateToggleButtonState(filtered);
           if (isStandalone) showToast(t("itemRemoved"), "info");
@@ -1653,7 +1761,7 @@ async function renderProductList(tcins, details, statuses = {}) {
             if (typeof updateSystemStatus === "function") updateSystemStatus(true);
             if (typeof startCountdown === "function") startCountdown(interval);
             const details2 = (await chrome.storage.local.get(["productDetails"])).productDetails || {};
-            const statuses2 = (await new Promise(r => chrome.runtime.sendMessage({ action: "getStatuses" }, r))).statuses || {};
+            const statuses2 = (await getStatusesFromBg()).statuses || {};
             await renderProductList(allTcins, details2, statuses2);
             showToast(t("resumedScanningItem"), "info");
             return;
@@ -1664,7 +1772,7 @@ async function renderProductList(tcins, details, statuses = {}) {
           else paused = [...paused, tcin];
           await chrome.storage.local.set({ pausedTCINs: paused });
           const details2 = (await chrome.storage.local.get(["productDetails"])).productDetails || {};
-          const statuses2 = (await new Promise(r => chrome.runtime.sendMessage({ action: "getStatuses" }, r))).statuses || {};
+          const statuses2 = (await getStatusesFromBg()).statuses || {};
           await renderProductList(allTcins, details2, statuses2);
           showToast(paused.includes(tcin) ? t("itemPaused") : t("itemResumed"), "info");
         });
@@ -1750,7 +1858,7 @@ async function renderProductList(tcins, details, statuses = {}) {
   }
 
   if (Object.keys(statuses).length === 0) {
-    const res = await new Promise(r => chrome.runtime.sendMessage({ action: "getStatuses" }, r));
+    const res = await getStatusesFromBg();
     statuses = res?.statuses || {};
   }
 
@@ -1878,4 +1986,5 @@ function startCountdown(interval, lastTime = Date.now()) {
   };
   tick();
   countdownInterval = setInterval(tick, 1000);
-}
+  }
+});

@@ -19,12 +19,14 @@ export const getMyPlan = query({
         plan: "free" as const,
         itemLimit: FREE_ITEM_LIMIT,
         email: identity.email ?? undefined,
+        locale: undefined as "en" | "es" | undefined,
       };
     }
     return {
       plan: profile.plan,
       itemLimit: profile.plan === "pro" ? 999 : FREE_ITEM_LIMIT,
       email: profile.email ?? identity.email ?? undefined,
+      locale: profile.locale,
     };
   },
 });
@@ -57,6 +59,43 @@ export const ensureProfile = mutation({
   },
 });
 
+/** Set the current user's language preference (called from dashboard/client with auth). */
+export const setMyLocale = mutation({
+  args: { locale: v.union(v.literal("en"), v.literal("es")) },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user_id", (q) => q.eq("userId", identity.tokenIdentifier))
+      .unique();
+    if (!profile) throw new Error("Profile not found");
+    await ctx.db.patch(profile._id, {
+      locale: args.locale,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/** Called by HTTP action with userId (tokenIdentifier) from JWT; no auth context in action. */
+export const setLocaleByUserId = internalMutation({
+  args: {
+    userId: v.string(),
+    locale: v.union(v.literal("en"), v.literal("es")),
+  },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!profile) return;
+    await ctx.db.patch(profile._id, {
+      locale: args.locale,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 /** Set Stripe customer ID on profile (call when creating Stripe Checkout Session). */
 export const setStripeCustomerId = mutation({
   args: { stripeCustomerId: v.string() },
@@ -75,7 +114,7 @@ export const setStripeCustomerId = mutation({
   },
 });
 
-/** Called by Stripe webhook to set a user to Pro. */
+/** Called by Stripe webhook when a subscription is created/updated/deleted (lookup by stripeCustomerId). */
 export const setPlanFromStripe = internalMutation({
   args: {
     stripeCustomerId: v.string(),
@@ -93,6 +132,28 @@ export const setPlanFromStripe = internalMutation({
     await ctx.db.patch(profile._id, {
       plan: args.plan,
       stripeSubscriptionId: args.stripeSubscriptionId ?? profile.stripeSubscriptionId,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/** Called by Stripe webhook on checkout.session.completed: link new Stripe customer to profile by userId. */
+export const setPlanFromCheckout = internalMutation({
+  args: {
+    userId: v.string(),
+    stripeCustomerId: v.string(),
+    stripeSubscriptionId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!profile) return;
+    await ctx.db.patch(profile._id, {
+      stripeCustomerId: args.stripeCustomerId,
+      stripeSubscriptionId: args.stripeSubscriptionId ?? profile.stripeSubscriptionId,
+      plan: "pro",
       updatedAt: Date.now(),
     });
   },

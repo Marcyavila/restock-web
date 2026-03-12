@@ -10,6 +10,7 @@ export default defineSchema({
     userId: v.string(),
     email: v.optional(v.string()),
     plan: v.union(v.literal("free"), v.literal("pro")),
+    locale: v.optional(v.union(v.literal("en"), v.literal("es"))),
     stripeCustomerId: v.optional(v.string()),
     stripeSubscriptionId: v.optional(v.string()),
     updatedAt: v.number(),
