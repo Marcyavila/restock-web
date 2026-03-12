@@ -130,7 +130,7 @@ function LogoutDone() {
 /** Convex HTTP base URL for createCheckoutSession (set VITE_CONVEX_SITE_URL in .env to match extension). */
 const CONVEX_HTTP_URL =
   (typeof import.meta !== "undefined" && (import.meta as { env?: { VITE_CONVEX_SITE_URL?: string } }).env?.VITE_CONVEX_SITE_URL) ||
-  "https://vibrant-gopher-82.convex.site";
+  "https://unique-ptarmigan-750.convex.site";
 
 /** Redirect signed-in users to Stripe Checkout; otherwise show sign-in with redirect back here. */
 function CheckoutRedirect() {
@@ -143,23 +143,37 @@ function CheckoutRedirect() {
     let cancelled = false;
     getToken()
       .then((token) => {
-        if (cancelled || !token) return;
+        if (cancelled || !token) return null;
         return fetch(`${CONVEX_HTTP_URL}/createCheckoutSession`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
       })
-      .then((res) => {
-        if (cancelled) return;
-        if (!res?.ok) throw new Error("Could not start checkout");
-        return res!.json();
+      .then(async (res) => {
+        if (cancelled) return null;
+        let body: { url?: string; error?: string } = {};
+        try {
+          body = res ? await res.json() : {};
+        } catch {
+          body = {};
+        }
+        if (!res?.ok) {
+          const msg = body?.error || `Request failed (${res?.status ?? "network"})`;
+          throw new Error(msg);
+        }
+        return body as { url?: string };
       })
-      .then((data: { url?: string }) => {
+      .then((data: { url?: string } | null) => {
         if (cancelled || !data?.url) return;
         window.location.href = data.url;
       })
-      .catch(() => {
-        if (!cancelled) setError("Could not start checkout. Try again or use the extension.");
+      .catch((err) => {
+        if (!cancelled) {
+          const message = err?.message && err.message !== "Could not start checkout"
+            ? err.message
+            : "Could not start checkout. Try again or use the extension.";
+          setError(message);
+        }
       });
     return () => { cancelled = true; };
   }, [isLoaded, isSignedIn, getToken]);
