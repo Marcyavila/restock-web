@@ -136,10 +136,13 @@ const CONVEX_HTTP_URL =
 function CheckoutRedirect() {
   const { getToken, isLoaded, isSignedIn } = useAuth();
   const [error, setError] = React.useState<string | null>(null);
+  const [statusCode, setStatusCode] = React.useState<number | null>(null);
+  const [retryKey, setRetryKey] = React.useState(0);
 
   useEffect(() => {
-    if (!isLoaded) return;
-    if (!isSignedIn) return;
+    if (!isLoaded || !isSignedIn) return;
+    setError(null);
+    setStatusCode(null);
     let cancelled = false;
     getToken()
       .then((token) => {
@@ -151,14 +154,16 @@ function CheckoutRedirect() {
       })
       .then(async (res) => {
         if (cancelled) return null;
+        if (res) setStatusCode(res.status);
+        const text = res ? await res.text() : "";
         let body: { url?: string; error?: string } = {};
         try {
-          body = res ? await res.json() : {};
+          body = text ? (JSON.parse(text) as { url?: string; error?: string }) : {};
         } catch {
-          body = {};
+          body = { error: text && text.length < 300 ? text : `Request failed (${res?.status ?? "network"})` };
         }
         if (!res?.ok) {
-          const msg = body?.error || `Request failed (${res?.status ?? "network"})`;
+          const msg = body?.error ?? `Request failed (${res?.status ?? "network"})`;
           throw new Error(msg);
         }
         return body as { url?: string };
@@ -169,14 +174,12 @@ function CheckoutRedirect() {
       })
       .catch((err) => {
         if (!cancelled) {
-          const message = err?.message && err.message !== "Could not start checkout"
-            ? err.message
-            : "Could not start checkout. Try again or use the extension.";
+          const message = err?.message ?? "Something went wrong. Try again or use the extension.";
           setError(message);
         }
       });
     return () => { cancelled = true; };
-  }, [isLoaded, isSignedIn, getToken]);
+  }, [isLoaded, isSignedIn, getToken, retryKey]);
 
   if (!isLoaded) return <div className="auth-page"><p className="auth-state-message">Loading…</p></div>;
   if (!isSignedIn) {
@@ -191,9 +194,36 @@ function CheckoutRedirect() {
     );
   }
   if (error) {
+    const is401 = statusCode === 401;
     return (
       <div className="auth-page">
         <p className="auth-state-message" style={{ color: "var(--clerk-error)" }}>{error}</p>
+        {statusCode != null && (
+          <p className="auth-state-message" style={{ fontSize: "0.85rem", opacity: 0.8 }}>
+            (HTTP {statusCode})
+          </p>
+        )}
+        {is401 && (
+          <p style={{ marginTop: "0.5rem", fontSize: "0.8rem", opacity: 0.85, maxWidth: "320px", textAlign: "center" }}>
+            Convex Production must have <code style={{ fontSize: "0.75rem" }}>CLERK_JWT_ISSUER_DOMAIN</code> set to your Clerk Frontend API URL (e.g. <code style={{ fontSize: "0.75rem" }}>https://viable-teal-46.clerk.accounts.dev</code>).
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={() => setRetryKey((k) => k + 1)}
+          style={{
+            marginTop: "1rem",
+            padding: "0.5rem 1rem",
+            fontSize: "0.9rem",
+            cursor: "pointer",
+            background: "var(--clerk-primary)",
+            color: "var(--clerk-primary-button-text)",
+            border: "none",
+            borderRadius: "6px",
+          }}
+        >
+          Retry
+        </button>
       </div>
     );
   }
