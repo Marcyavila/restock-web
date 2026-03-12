@@ -205,7 +205,7 @@ function CheckoutRedirect() {
         )}
         {is401 && (
           <p style={{ marginTop: "0.5rem", fontSize: "0.8rem", opacity: 0.85, maxWidth: "320px", textAlign: "center" }}>
-            Convex Production must have <code style={{ fontSize: "0.75rem" }}>CLERK_JWT_ISSUER_DOMAIN</code> set to your Clerk Frontend API URL (e.g. <code style={{ fontSize: "0.75rem" }}>https://viable-teal-46.clerk.accounts.dev</code>).
+            Convex Production must have <code style={{ fontSize: "0.75rem" }}>CLERK_JWT_ISSUER_DOMAIN</code> set to your Clerk Frontend API URL (e.g. <code style={{ fontSize: "0.75rem" }}>https://clerk.getrestock.app</code>).
           </p>
         )}
         <button

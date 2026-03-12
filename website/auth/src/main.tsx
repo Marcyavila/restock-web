@@ -11,6 +11,15 @@ if (!publishableKey) {
   throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY");
 }
 
+/** Optional: custom Clerk Frontend API domain (e.g. clerk.getrestock.app). Set in production env. */
+const clerkDomain = import.meta.env.VITE_CLERK_DOMAIN;
+
+/** Production = no "Development mode" badge. Keys starting with pk_live_ are production. */
+const isProductionClerk = publishableKey.startsWith("pk_live_");
+if (typeof document !== "undefined") {
+  document.documentElement.dataset.clerkBuild = isProductionClerk ? "production" : "development";
+}
+
 const allowedRedirectOrigins = [
   "https://getrestock.app",
   "https://www.getrestock.app",
@@ -21,6 +30,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ClerkProvider
       publishableKey={publishableKey}
+      domain={clerkDomain || undefined}
       allowedRedirectOrigins={allowedRedirectOrigins}
       appearance={clerkAppearance}
     >
