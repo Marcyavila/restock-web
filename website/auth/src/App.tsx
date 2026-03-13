@@ -422,26 +422,28 @@ function DirectCheckoutFlow({ redirectUrl }: { redirectUrl: string }) {
 
   if (checkout.status === "needs_initialization") {
     return (
-      <div className="auth-page">
-        <div className="auth-layout__card">
-          <div className="auth-card__logoRow" aria-hidden="true">
-            <img src={logoUrl} alt="" className="auth-card__logo" />
+      <div className="auth-page auth-page--checkout">
+        <div className="checkout-card">
+          <div className="checkout-card__header">
+            <img src={logoUrl} alt="" className="checkout-card__logo" />
+            <div className="checkout-card__brand">Pro</div>
           </div>
-          <p className="auth-state-message" style={{ marginTop: "1rem" }}>
-            Loading checkout…
-          </p>
+          <div className="checkout-flow">
+            <p className="checkout-form__loading">Loading checkout…</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-layout__card">
-        <div className="auth-card__logoRow" aria-hidden="true">
-          <img src={logoUrl} alt="" className="auth-card__logo" />
+    <div className="auth-page auth-page--checkout">
+      <div className="checkout-card">
+        <div className="checkout-card__header">
+          <img src={logoUrl} alt="" className="checkout-card__logo" />
+          <div className="checkout-card__brand">Pro</div>
         </div>
-        <div style={{ marginTop: "1rem", width: "100%", maxWidth: "420px" }}>
+        <div className="checkout-flow">
           <CheckoutSummary />
           <PaymentElementProvider checkout={checkout}>
             <CheckoutPaymentForm redirectUrl={redirectUrl} />
@@ -456,14 +458,18 @@ function CheckoutSummary() {
   const { checkout } = useCheckout();
   if (!checkout.plan || !checkout.totals) return null;
   return (
-    <div style={{ marginBottom: "1rem", fontSize: "0.95rem" }}>
-      <p style={{ margin: 0, fontWeight: 600 }}>{checkout.plan.name}</p>
-      <p style={{ margin: "0.25rem 0 0", opacity: 0.9 }}>
-        {checkout.totals.totalDueNow.currencySymbol} {checkout.totals.totalDueNow.amountFormatted} due now
+    <div className="checkout-summary">
+      <div className="checkout-summary__plan">{checkout.plan.name}</div>
+      <div className="checkout-summary__price">
+        <span className="checkout-summary__due">
+          {checkout.totals.totalDueNow.currencySymbol}{checkout.totals.totalDueNow.amountFormatted} due now
+        </span>
         {checkout.totals.totalDueAfterFreeTrial?.amountFormatted != null && (
-          <> · {checkout.totals.totalDueAfterFreeTrial.currencySymbol} {checkout.totals.totalDueAfterFreeTrial.amountFormatted} after trial</>
+          <span className="checkout-summary__after-trial">
+            {checkout.totals.totalDueAfterFreeTrial.currencySymbol}{checkout.totals.totalDueAfterFreeTrial.amountFormatted} after trial
+          </span>
         )}
-      </p>
+      </div>
     </div>
   );
 }
@@ -507,10 +513,12 @@ function CheckoutPaymentForm({ redirectUrl }: { redirectUrl: string }) {
   const isSubmitting = isProcessing || fetchStatus === "fetching";
 
   return (
-    <form onSubmit={handleSubmit}>
-      <PaymentElement fallback={<p className="auth-state-message" style={{ margin: "0.5rem 0" }}>Loading payment form…</p>} />
+    <form className="checkout-form" onSubmit={handleSubmit}>
+      <div className="checkout-form__payment">
+        <PaymentElement fallback={<div className="checkout-form__loading">Loading payment form…</div>} />
+      </div>
       {errors?.global?.length ? (
-        <ul style={{ margin: "0.5rem 0", paddingLeft: "1.25rem", fontSize: "0.9rem", color: "var(--clerk-error, #c53030)" }}>
+        <ul className="checkout-form__errors">
           {errors.global.map((err: { message?: string; longMessage?: string }, i: number) => (
             <li key={i}>{err.longMessage ?? err.message}</li>
           ))}
@@ -519,18 +527,7 @@ function CheckoutPaymentForm({ redirectUrl }: { redirectUrl: string }) {
       <button
         type="submit"
         disabled={!isFormReady || isSubmitting}
-        style={{
-          marginTop: "1rem",
-          padding: "0.75rem 1.25rem",
-          width: "100%",
-          fontSize: "1rem",
-          fontWeight: 600,
-          cursor: isFormReady && !isSubmitting ? "pointer" : "not-allowed",
-          background: "var(--clerk-primary, #0ea5e9)",
-          color: "var(--clerk-primary-button-text, #fff)",
-          border: "none",
-          borderRadius: "8px",
-        }}
+        className="checkout-form__submit"
       >
         {isSubmitting ? "Processing…" : "Complete subscription"}
       </button>
