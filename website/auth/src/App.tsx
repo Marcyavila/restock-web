@@ -445,7 +445,38 @@ function DirectCheckoutFlow({ redirectUrl }: { redirectUrl: string }) {
         </div>
         <div className="checkout-flow">
           <CheckoutSummary />
-          <PaymentElementProvider checkout={checkout}>
+          <PaymentElementProvider
+            checkout={checkout}
+            stripeAppearance={
+              {
+                theme: "night",
+                variables: {
+                  colorPrimary: "#7c3aed",
+                  colorBackground: "#16161a",
+                  colorText: "#fafafa",
+                  colorDanger: "#f87171",
+                  colorSuccess: "#22c55e",
+                  colorTextSecondary: "#8e8e98",
+                  borderRadius: "12px",
+                  fontFamily: "Plus Jakarta Sans, system-ui, sans-serif",
+                  spacingUnit: "4px",
+                },
+                rules: {
+                  ".Input": {
+                    border: "1px solid rgba(255, 255, 255, 0.12)",
+                    boxShadow: "none",
+                  },
+                  ".Input:focus": {
+                    border: "1px solid #7c3aed",
+                    boxShadow: "0 0 0 3px rgba(124, 58, 237, 0.25)",
+                  },
+                  ".Label": {
+                    color: "#8e8e98",
+                  },
+                },
+              } as unknown as React.ComponentProps<typeof PaymentElementProvider>["stripeAppearance"]
+            }
+          >
             <CheckoutPaymentForm redirectUrl={redirectUrl} />
           </PaymentElementProvider>
         </div>
