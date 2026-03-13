@@ -1,6 +1,13 @@
 import React, { useEffect } from "react";
-import { SignIn, SignedIn, useAuth, useClerk } from "@clerk/clerk-react";
-import { CheckoutButton, usePlans } from "@clerk/clerk-react/experimental";
+import { SignIn, useAuth, useClerk } from "@clerk/clerk-react";
+import {
+  CheckoutProvider,
+  useCheckout,
+  usePlans,
+  PaymentElementProvider,
+  PaymentElement,
+  usePaymentElement,
+} from "@clerk/clerk-react/experimental";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 // Use your site-hosted logo asset (not Clerk's uploaded logo).
@@ -396,44 +403,138 @@ function DirectCheckoutPage() {
   }
   const planId = (proPlan as { id: string }).id;
   return (
+    <CheckoutProvider for="user" planId={planId} planPeriod="month">
+      <DirectCheckoutFlow redirectUrl={redirectUrl} />
+    </CheckoutProvider>
+  );
+}
+
+/** Auto-starts checkout and shows payment form (no button step). */
+function DirectCheckoutFlow({ redirectUrl }: { redirectUrl: string }) {
+  const { checkout } = useCheckout();
+  const started = React.useRef(false);
+  React.useEffect(() => {
+    if (checkout.status === "needs_initialization" && !started.current) {
+      started.current = true;
+      checkout.start();
+    }
+  }, [checkout.status, checkout]);
+
+  if (checkout.status === "needs_initialization") {
+    return (
+      <div className="auth-page">
+        <div className="auth-layout__card">
+          <div className="auth-card__logoRow" aria-hidden="true">
+            <img src={logoUrl} alt="" className="auth-card__logo" />
+          </div>
+          <p className="auth-state-message" style={{ marginTop: "1rem" }}>
+            Loading checkout…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="auth-page">
       <div className="auth-layout__card">
         <div className="auth-card__logoRow" aria-hidden="true">
           <img src={logoUrl} alt="" className="auth-card__logo" />
         </div>
-        <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-          <p className="auth-state-message" style={{ marginBottom: "1rem" }}>
-            Upgrade to Pro
-          </p>
-          <SignedIn>
-            <CheckoutButton
-              for="user"
-              planId={planId}
-              planPeriod="month"
-              onSubscriptionComplete={() => {
-                window.location.href = redirectUrl;
-              }}
-            >
-              <button
-                type="button"
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  background: "var(--clerk-primary, #0ea5e9)",
-                  color: "var(--clerk-primary-button-text, #fff)",
-                  border: "none",
-                  borderRadius: "8px",
-                }}
-              >
-                Subscribe to Pro
-              </button>
-            </CheckoutButton>
-          </SignedIn>
+        <div style={{ marginTop: "1rem", width: "100%", maxWidth: "420px" }}>
+          <CheckoutSummary />
+          <PaymentElementProvider checkout={checkout}>
+            <CheckoutPaymentForm redirectUrl={redirectUrl} />
+          </PaymentElementProvider>
         </div>
       </div>
     </div>
+  );
+}
+
+function CheckoutSummary() {
+  const { checkout } = useCheckout();
+  if (!checkout.plan || !checkout.totals) return null;
+  return (
+    <div style={{ marginBottom: "1rem", fontSize: "0.95rem" }}>
+      <p style={{ margin: 0, fontWeight: 600 }}>{checkout.plan.name}</p>
+      <p style={{ margin: "0.25rem 0 0", opacity: 0.9 }}>
+        {checkout.totals.totalDueNow.currencySymbol} {checkout.totals.totalDueNow.amountFormatted} due now
+        {checkout.totals.totalDueAfterFreeTrial?.amountFormatted != null && (
+          <> · {checkout.totals.totalDueAfterFreeTrial.currencySymbol} {checkout.totals.totalDueAfterFreeTrial.amountFormatted} after trial</>
+        )}
+      </p>
+    </div>
+  );
+}
+
+function CheckoutPaymentForm({ redirectUrl }: { redirectUrl: string }) {
+  const { checkout } = useCheckout();
+  const fetchStatus = (checkout as { fetchStatus?: string }).fetchStatus ?? "idle";
+  const errors = (checkout as { errors?: { global?: Array<{ message?: string; longMessage?: string }> } }).errors;
+  const { isFormReady, submit } = usePaymentElement();
+  const [isProcessing, setIsProcessing] = React.useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!isFormReady || isProcessing || fetchStatus === "fetching") return;
+    setIsProcessing(true);
+    try {
+      const { data, error } = await submit();
+      if (error) {
+        console.error(error);
+        setIsProcessing(false);
+        return;
+      }
+      const { error: confirmError } = await checkout.confirm(data);
+      if (confirmError) {
+        console.error(confirmError);
+        setIsProcessing(false);
+        return;
+      }
+      await (checkout.finalize as (opts?: { navigate?: (arg: unknown) => void }) => Promise<unknown>)({
+        navigate: () => {
+          window.location.href = redirectUrl;
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const isSubmitting = isProcessing || fetchStatus === "fetching";
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <PaymentElement fallback={<p className="auth-state-message" style={{ margin: "0.5rem 0" }}>Loading payment form…</p>} />
+      {errors?.global?.length ? (
+        <ul style={{ margin: "0.5rem 0", paddingLeft: "1.25rem", fontSize: "0.9rem", color: "var(--clerk-error, #c53030)" }}>
+          {errors.global.map((err: { message?: string; longMessage?: string }, i: number) => (
+            <li key={i}>{err.longMessage ?? err.message}</li>
+          ))}
+        </ul>
+      ) : null}
+      <button
+        type="submit"
+        disabled={!isFormReady || isSubmitting}
+        style={{
+          marginTop: "1rem",
+          padding: "0.75rem 1.25rem",
+          width: "100%",
+          fontSize: "1rem",
+          fontWeight: 600,
+          cursor: isFormReady && !isSubmitting ? "pointer" : "not-allowed",
+          background: "var(--clerk-primary, #0ea5e9)",
+          color: "var(--clerk-primary-button-text, #fff)",
+          border: "none",
+          borderRadius: "8px",
+        }}
+      >
+        {isSubmitting ? "Processing…" : "Complete subscription"}
+      </button>
+    </form>
   );
 }
 
