@@ -459,17 +459,17 @@ function CheckoutSummary() {
   if (!checkout.plan || !checkout.totals) return null;
   return (
     <div className="checkout-summary">
-      <div className="checkout-summary__plan">{checkout.plan.name}</div>
-      <div className="checkout-summary__price">
+      <div className="checkout-summary__row">
+        <span className="checkout-summary__label">{checkout.plan.name}</span>
         <span className="checkout-summary__due">
-          {checkout.totals.totalDueNow.currencySymbol}{checkout.totals.totalDueNow.amountFormatted} due now
+          {checkout.totals.totalDueNow.currencySymbol}{checkout.totals.totalDueNow.amountFormatted} due today
         </span>
-        {checkout.totals.totalDueAfterFreeTrial?.amountFormatted != null && (
-          <span className="checkout-summary__after-trial">
-            {checkout.totals.totalDueAfterFreeTrial.currencySymbol}{checkout.totals.totalDueAfterFreeTrial.amountFormatted} after trial
-          </span>
-        )}
       </div>
+      {checkout.totals.totalDueAfterFreeTrial?.amountFormatted != null && (
+        <div className="checkout-summary__trial">
+          Then {checkout.totals.totalDueAfterFreeTrial.currencySymbol}{checkout.totals.totalDueAfterFreeTrial.amountFormatted}/mo after trial
+        </div>
+      )}
     </div>
   );
 }
@@ -531,6 +531,9 @@ function CheckoutPaymentForm({ redirectUrl }: { redirectUrl: string }) {
       >
         {isSubmitting ? "Processing…" : "Complete subscription"}
       </button>
+      <p className="checkout-form__secure" aria-hidden="true">
+        Secured by Stripe
+      </p>
     </form>
   );
 }

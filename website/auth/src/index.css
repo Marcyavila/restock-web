@@ -505,11 +505,11 @@ body {
 
 .checkout-card {
   width: 100%;
-  max-width: 440px;
-  background: linear-gradient(180deg, rgba(22, 22, 26, 0.97) 0%, rgba(18, 18, 22, 0.97) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 20px;
-  box-shadow: 0 32px 64px -24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  max-width: 460px;
+  background: linear-gradient(180deg, rgba(22, 22, 26, 0.98) 0%, rgba(18, 18, 22, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 22px;
+  box-shadow: 0 40px 80px -32px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.03);
   overflow: hidden;
 }
 
@@ -537,45 +537,51 @@ body {
 }
 
 .checkout-flow {
-  padding: 28px 24px 32px;
+  padding: 32px 28px 36px;
 }
 
 .checkout-summary {
-  margin-bottom: 24px;
-  padding-bottom: 20px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.checkout-summary__plan {
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--auth-text);
-  margin-bottom: 4px;
+.checkout-summary__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.checkout-summary__price {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 12px;
+.checkout-summary__label {
   font-size: 0.9375rem;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--auth-text-secondary);
 }
 
 .checkout-summary__due {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--auth-text);
 }
 
-.checkout-summary__after-trial {
+.checkout-summary__trial {
+  margin-top: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
   color: var(--auth-text-muted);
 }
 
 .checkout-form__payment {
   min-height: 200px;
-  margin-bottom: 20px;
-  padding: 20px 0 0;
-  border-radius: 12px;
+  margin-bottom: 24px;
+  padding: 20px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .checkout-form__payment > div,
@@ -642,4 +648,12 @@ body {
 .checkout-form__submit:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.4);
+}
+
+.checkout-form__secure {
+  margin: 12px 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--auth-text-muted);
+  text-align: center;
 }
